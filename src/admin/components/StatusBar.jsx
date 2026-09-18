@@ -15,10 +15,17 @@ export default function StatusBar({ gameState, user, onSignOut }) {
 
   return (
     <header className="h-11 bg-navy-950/80 border-b border-white/5 flex items-center px-4 gap-4 shrink-0">
-      {/* Title */}
-      <span className="text-gold-400 font-bold text-sm font-devanagari whitespace-nowrap">
-        KBC Admin
-      </span>
+      {/* Logo + Title */}
+      <div className="flex items-center gap-2">
+        <img
+          src="/jainKBC_logo.png"
+          alt="Jain KBC Logo"
+          className="w-6 h-6 object-contain"
+        />
+        <span className="text-gold-400 font-bold text-sm font-devanagari whitespace-nowrap">
+          KBC Admin
+        </span>
+      </div>
 
       <div className="h-4 w-px bg-white/10" />
 

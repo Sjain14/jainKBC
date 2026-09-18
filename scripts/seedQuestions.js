@@ -54,7 +54,7 @@ async function seed() {
   let totalWritten = 0
 
   for (const [levelKey, questions] of Object.entries(questionsData)) {
-    // levelKey = "level_1", "level_2", …
+    // levelKey = "level_1", "level_2", … or "backup"
     const levelRef = db.ref(`questions/${levelKey}`)
 
     for (const q of questions) {

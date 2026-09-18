@@ -1,20 +1,21 @@
 /**
  * questions.js — Firebase RTDB helpers for question bank management.
- * Questions live at /questions/level_{N}/{questionId}
- * Fields: text, optionA, optionB, optionC, optionD, correctOption, isPrimary, used
- * isPrimary=true  → default question shown when level starts
- * isPrimary=false → backup questions (shown in Change Question modal)
- * used=true       → already used this session; skip in listings
+ *
+ * Structure:
+ *   /questions/level_{N}/{questionId}  — set questions (set: 1-8, isPrimary: true)
+ *   /questions/backup/{questionId}     — global backup questions (set: 'backup')
+ *
+ * Fields: text, optionA-D, correctOption, description, isPrimary, set, used
  */
 
-import { ref, get, update, push, query, orderByChild, equalTo } from 'firebase/database'
+import { ref, get, update, push } from 'firebase/database'
 import { db } from './config.js'
 
-const levelRef = (level) => ref(db, `questions/level_${level}`)
+const levelRef  = (level) => ref(db, `questions/level_${level}`)
+const backupRef = ()      => ref(db, 'questions/backup')
 
 /**
  * Get all questions for a level.
- * Returns array of { id, ...fields }
  */
 export async function getQuestionsByLevel(level) {
   const snap = await get(levelRef(level))
@@ -23,33 +24,47 @@ export async function getQuestionsByLevel(level) {
 }
 
 /**
- * Get the primary (isPrimary=true, used=false) question for a level.
- * Returns the first match, or null.
+ * Get the primary question for a level filtered by set number.
+ * Falls back to any unused primary if the set's question is already used.
  */
-export async function getPrimaryQuestion(level) {
+export async function getPrimaryQuestion(level, set = 1) {
   const all = await getQuestionsByLevel(level)
-  return all.find(q => q.isPrimary && !q.used) ?? all.find(q => q.isPrimary) ?? null
+  // First try: exact set match, unused
+  const exact = all.find(q => q.isPrimary && q.set === set && !q.used)
+  if (exact) return exact
+  // Fallback: same set even if used (re-run scenario)
+  const setMatch = all.find(q => q.isPrimary && q.set === set)
+  if (setMatch) return setMatch
+  // Last resort: any primary
+  return all.find(q => q.isPrimary) ?? null
 }
 
 /**
- * Get backup (isPrimary=false, used=false) questions for a level.
- * Returns array sorted by text.
+ * Get all global backup questions (from /questions/backup).
+ * Returns all of them — used ones are flagged but still returned so host can see used status.
  */
-export async function getBackupQuestions(level) {
-  const all = await getQuestionsByLevel(level)
-  return all.filter(q => !q.isPrimary && !q.used)
+export async function getBackupQuestions() {
+  const snap = await get(backupRef())
+  if (!snap.exists()) return []
+  return Object.entries(snap.val()).map(([id, val]) => ({ id, ...val }))
 }
 
 /**
- * Mark a question as used so it won't appear again.
+ * Mark a level question as used.
  */
 export async function markQuestionUsed(level, questionId) {
   await update(ref(db, `questions/level_${level}/${questionId}`), { used: true })
 }
 
 /**
+ * Mark a backup question as used.
+ */
+export async function markBackupUsed(questionId) {
+  await update(ref(db, `questions/backup/${questionId}`), { used: true })
+}
+
+/**
  * Reset all questions in a level (clear used flags).
- * Useful for re-running the event.
  */
 export async function resetLevelQuestions(level) {
   const all = await getQuestionsByLevel(level)
@@ -61,17 +76,29 @@ export async function resetLevelQuestions(level) {
 }
 
 /**
- * Reset ALL question used flags across all levels.
+ * Reset all backup questions.
+ */
+export async function resetBackupQuestions() {
+  const all = await getBackupQuestions()
+  const updates = {}
+  all.forEach(q => {
+    updates[`questions/backup/${q.id}/used`] = false
+  })
+  await update(ref(db), updates)
+}
+
+/**
+ * Reset ALL question used flags across all levels + backups.
  */
 export async function resetAllQuestions() {
   for (let lvl = 1; lvl <= 7; lvl++) {
     await resetLevelQuestions(lvl)
   }
+  await resetBackupQuestions()
 }
 
 /**
  * Add a new question to a level programmatically.
- * (Used by admin panel quick-add if needed)
  */
 export async function addQuestion(level, questionData) {
   const newRef = push(levelRef(level))

@@ -15,10 +15,9 @@
 
 import { useEffect, useCallback } from 'react'
 import { Navigate } from 'react-router-dom'
-import { useAdminAuth }      from '../hooks/useAdminAuth.js'
-import { useGameState }      from '../hooks/useGameState.js'
-import { useConnectionStatus } from '../hooks/useConnectionStatus.js'
-import StatusBar             from './components/StatusBar.jsx'
+import { useAdminAuth }  from '../hooks/useAdminAuth.js'
+import { useGameState }  from '../hooks/useGameState.js'
+import StatusBar         from './components/StatusBar.jsx'
 import PrizeLadderMini       from './components/PrizeLadderMini.jsx'
 import QuestionPanel         from './components/QuestionPanel.jsx'
 import GameControls          from './components/GameControls.jsx'
@@ -30,7 +29,6 @@ import { getRemainingSeconds } from '../hooks/useTimer.js'
 export default function AdminApp() {
   const { user, loading: authLoading, signOut } = useAdminAuth()
   const { gameState, loading: gsLoading } = useGameState()
-  const connected = useConnectionStatus()
 
   // ── Keyboard shortcuts — must be declared before any conditional return ──
   const handleKey = useCallback((e) => {
@@ -88,7 +86,6 @@ export default function AdminApp() {
       {/* Top status bar */}
       <StatusBar
         gameState={gameState}
-        connected={connected}
         user={user}
         onSignOut={signOut}
       />

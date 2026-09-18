@@ -7,7 +7,7 @@
  *    it when showCorrectAnswer === true.
  */
 
-import { ref, update, get, push, serverTimestamp } from 'firebase/database'
+import { ref, update, push, serverTimestamp } from 'firebase/database'
 import { db } from './config.js'
 
 const gsRef = () => ref(db, 'gameState')
@@ -19,14 +19,18 @@ export const INITIAL_GAME_STATE = {
   currentLevel: 0,         // 1-7
   contestantName: '',
 
+  // Selected question set (1-8)
+  selectedSet: 1,
+
   // Current question (written by admin when loading a question)
-  questionId:     '',
-  questionText:   '',
-  optionA:        '',
-  optionB:        '',
-  optionC:        '',
-  optionD:        '',
-  correctOption:  '',      // 'A'|'B'|'C'|'D' — hidden from player until reveal
+  questionId:          '',
+  questionText:        '',
+  optionA:             '',
+  optionB:             '',
+  optionC:             '',
+  optionD:             '',
+  correctOption:       '',      // 'A'|'B'|'C'|'D' — hidden from player until reveal
+  questionDescription: '',      // host-only explanation shown in admin panel
 
   // Answer state
   selectedOption:    '',   // which option admin locked in
@@ -79,28 +83,34 @@ export async function setContestantName(name) {
 export async function loadQuestion(level, question, levelTitle) {
   const timerEnabled = level <= 3
   await update(gsRef(), {
-    phase:          'question',
-    currentLevel:   level,
-    questionId:     question.id,
-    questionText:   question.text,
-    optionA:        question.optionA,
-    optionB:        question.optionB,
-    optionC:        question.optionC,
-    optionD:        question.optionD,
-    correctOption:  question.correctOption,
-    selectedOption:    '',
-    showCorrectAnswer: false,
-    showAudiencePoll:  false,
-    showExpertOverlay: false,
-    expertMessage:     '',
-    currentLevelTitle: levelTitle,
+    phase:               'question',
+    currentLevel:        level,
+    questionId:          question.id,
+    questionText:        question.text,
+    optionA:             question.optionA,
+    optionB:             question.optionB,
+    optionC:             question.optionC,
+    optionD:             question.optionD,
+    correctOption:       question.correctOption,
+    questionDescription: question.description ?? '',
+    selectedOption:      '',
+    showCorrectAnswer:   false,
+    showAudiencePoll:    false,
+    showExpertOverlay:   false,
+    expertMessage:       '',
+    currentLevelTitle:   levelTitle,
     timerEnabled,
-    timerRunning:   timerEnabled,
-    timerSeconds:   45,
-    timerStartedAt: timerEnabled ? Date.now() : 0,
-    gamePaused:     false,
-    updatedAt:      Date.now(),
+    timerRunning:        timerEnabled,
+    timerSeconds:        45,
+    timerStartedAt:      timerEnabled ? Date.now() : 0,
+    gamePaused:          false,
+    updatedAt:           Date.now(),
   })
+}
+
+/** Set selected question set (1-8) */
+export async function setSelectedSet(set) {
+  await update(gsRef(), { selectedSet: set, updatedAt: Date.now() })
 }
 
 /** Admin selects / locks an answer option */

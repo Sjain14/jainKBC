@@ -9,9 +9,9 @@
 import { useState } from 'react'
 import {
   triggerAskAudience, hideAudiencePoll,
-  markChangeQUsed,
   triggerAskExpert, hideExpertOverlay,
 } from '../../firebase/gameState.js'
+import { collectVotePercentages } from '../../hooks/useAudienceVote.js'
 import ChangeQModal from './ChangeQModal.jsx'
 
 const BTN = 'px-3 py-2 rounded-lg text-xs font-semibold transition-all active:scale-95 disabled:opacity-40'
@@ -21,31 +21,23 @@ export default function LifelinePanel({ gameState }) {
     lifelineAskAudienceUsed, lifelineChangeQUsed, lifelineAskExpertUsed,
     showAudiencePoll, showExpertOverlay,
     phase, currentLevel,
+    questionId: currentQuestionId,
   } = gameState
 
-  const [audienceVals, setAudienceVals] = useState({ A: 25, B: 25, C: 25, D: 25 })
-  const [expertMsg,    setExpertMsg]    = useState('')
-  const [showChangeQ,  setShowChangeQ]  = useState(false)
+  const [collecting,  setCollecting]  = useState(false)
+  const [expertMsg,   setExpertMsg]   = useState('')
+  const [showChangeQ, setShowChangeQ] = useState(false)
 
   const isQuestion = phase === 'question'
 
-  // Normalize poll values to sum to 100
-  function normalizePoll() {
-    const total = Object.values(audienceVals).reduce((s, v) => s + Number(v), 0)
-    if (total === 0) return { A: 25, B: 25, C: 25, D: 25 }
-    const norm = {}
-    let sum = 0
-    ;['A','B','C'].forEach(k => {
-      norm[k] = Math.round((Number(audienceVals[k]) / total) * 100)
-      sum += norm[k]
-    })
-    norm['D'] = 100 - sum
-    return norm
-  }
-
   async function handleAskAudience() {
-    const p = normalizePoll()
-    await triggerAskAudience(p.A, p.B, p.C, p.D)
+    setCollecting(true)
+    try {
+      const p = await collectVotePercentages(currentQuestionId)
+      await triggerAskAudience(p.A, p.B, p.C, p.D)
+    } finally {
+      setCollecting(false)
+    }
   }
 
   async function handleExpert() {
@@ -66,31 +58,17 @@ export default function LifelinePanel({ gameState }) {
         </div>
 
         {!lifelineAskAudienceUsed && (
-          <>
-            <div className="grid grid-cols-4 gap-1.5">
-              {['A','B','C','D'].map(opt => (
-                <div key={opt} className="flex flex-col items-center gap-1">
-                  <label className="text-[10px] text-gray-400 font-bold">{opt}</label>
-                  <input
-                    type="number" min="0" max="100"
-                    value={audienceVals[opt]}
-                    onChange={e => setAudienceVals(v => ({ ...v, [opt]: e.target.value }))}
-                    disabled={!isQuestion}
-                    className="w-full bg-navy-900 border border-white/10 rounded px-1.5 py-1
-                               text-xs text-white text-center focus:outline-none focus:border-blue-400
-                               disabled:opacity-30"
-                  />
-                </div>
-              ))}
-            </div>
-
+          <div className="space-y-2">
+            <p className="text-[11px] text-gray-500">
+              Player screens पर सभी वोट collect होते हैं। नीचे button दबाने पर real votes से poll दिखेगा।
+            </p>
             <div className="flex gap-2">
               <button
                 onClick={handleAskAudience}
-                disabled={!isQuestion}
+                disabled={!isQuestion || collecting}
                 className={`${BTN} flex-1 bg-blue-700 hover:bg-blue-600 text-white`}
               >
-                📊 Show Poll
+                {collecting ? '⏳ Collecting…' : '📊 Collect & Show Poll'}
               </button>
               {showAudiencePoll && (
                 <button
@@ -101,7 +79,7 @@ export default function LifelinePanel({ gameState }) {
                 </button>
               )}
             </div>
-          </>
+          </div>
         )}
       </div>
 
@@ -168,7 +146,6 @@ export default function LifelinePanel({ gameState }) {
       {showChangeQ && (
         <ChangeQModal
           level={currentLevel}
-          gameState={gameState}
           onClose={() => setShowChangeQ(false)}
         />
       )}

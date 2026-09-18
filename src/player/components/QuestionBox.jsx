@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 
-export default function QuestionBox({ text, level }) {
+export default function QuestionBox({ text, level: _level }) {
   return (
     <motion.div
       className="w-full bg-navy-800/70 border border-gold-600/30 rounded-2xl px-5 py-5 sm:px-8 sm:py-6 kbc-glow"

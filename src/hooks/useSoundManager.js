@@ -15,7 +15,7 @@
  */
 
 import { useRef, useCallback } from 'react'
-import { Howl, Howler }        from 'howler'
+import { Howl }                from 'howler'
 
 const SOUNDS = {
   'idle-bg':       { src: ['/sounds/idle-bg.mp3'],       loop: true,  volume: 0.35 },

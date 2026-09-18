@@ -1,5 +1,7 @@
+import { useState } from 'react'
+import ChangeQModal from './ChangeQModal.jsx'
+
 const LABELS = ['A', 'B', 'C', 'D']
-const OPTION_KEYS = ['optionA', 'optionB', 'optionC', 'optionD']
 
 const STATE_COLORS = {
   selected: 'border-yellow-400 bg-yellow-500/10 text-yellow-200',
@@ -9,10 +11,13 @@ const STATE_COLORS = {
 }
 
 export default function QuestionPanel({ gameState }) {
+  const [showAnswer,       setShowAnswer]       = useState(false)
+  const [showOverrideModal, setShowOverrideModal] = useState(false)
+
   const {
     phase, questionText, optionA, optionB, optionC, optionD,
     selectedOption, correctOption, showCorrectAnswer, currentLevel,
-    currentLevelTitle,
+    currentLevelTitle, questionDescription,
   } = gameState
 
   if (phase === 'idle' || !questionText) {
@@ -75,6 +80,50 @@ export default function QuestionPanel({ gameState }) {
         </div>
       )}
 
+      {/* ── Host Answer Panel ── */}
+      <div className="border-t border-white/5 pt-3">
+        <button
+          onClick={() => setShowAnswer(v => !v)}
+          className="w-full flex items-center justify-between px-3 py-2 rounded-lg
+                     bg-amber-900/20 border border-amber-700/30 hover:bg-amber-900/30 transition-colors"
+        >
+          <span className="text-xs font-bold text-amber-400 uppercase tracking-widest">
+            🔑 Host: सही उत्तर देखें
+          </span>
+          <span className="text-amber-500 text-xs">{showAnswer ? '▲ छुपाएँ' : '▼ देखें'}</span>
+        </button>
+
+        {showAnswer && (
+          <div className="mt-2 rounded-lg bg-amber-900/10 border border-amber-700/20 px-3 py-2.5 space-y-2">
+            <p className="text-amber-300 font-bold text-sm">
+              सही उत्तर: <span className="text-white">{correctOption}</span>
+              {correctOption && (
+                <span className="text-gray-300 font-normal ml-2">
+                  — {gameState[`option${correctOption}`]}
+                </span>
+              )}
+            </p>
+            {questionDescription && (
+              <p className="text-gray-300 text-xs font-devanagari leading-relaxed border-t border-amber-700/20 pt-2">
+                {questionDescription}
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* ── Admin Override: swap question without using lifeline ── */}
+      <div className="border-t border-white/5 pt-3">
+        <button
+          onClick={() => setShowOverrideModal(true)}
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg
+                     bg-red-900/20 border border-red-700/30 hover:bg-red-900/30 transition-colors
+                     text-xs font-bold text-red-400 uppercase tracking-widest"
+        >
+          ⚙️ Admin Override — प्रश्न बदलें (lifeline नहीं लगेगी)
+        </button>
+      </div>
+
       {/* Keyboard hint */}
       <p className="text-[10px] text-gray-600 text-center">
         Keyboard: <kbd className="bg-white/10 rounded px-1">1</kbd>
@@ -84,6 +133,15 @@ export default function QuestionPanel({ gameState }) {
         &nbsp;= A B C D &nbsp;|&nbsp;
         <kbd className="bg-white/10 rounded px-1">R</kbd> = Reveal
       </p>
+
+      {/* Admin Override Modal */}
+      {showOverrideModal && (
+        <ChangeQModal
+          level={currentLevel}
+          onClose={() => setShowOverrideModal(false)}
+          adminOverride={true}
+        />
+      )}
     </div>
   )
 }

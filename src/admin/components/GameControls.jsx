@@ -8,22 +8,30 @@ import { useState } from 'react'
 import {
   resetGameState, setContestantName, loadQuestion, selectOption,
   revealAnswer, advanceToResult, declareWinner, gameOver, quitGame,
-  saveGameResult,
+  saveGameResult, setSelectedSet,
 } from '../../firebase/gameState.js'
 import { getRemainingSeconds } from '../../hooks/useTimer.js'
 import { pauseTimer, resumeTimer } from '../../firebase/gameState.js'
 import { getPrimaryQuestion, markQuestionUsed } from '../../firebase/questions.js'
 import { PRIZE_LADDER } from '../../data/prizeLadder.js'
-import ChangeQModal from './ChangeQModal.jsx'
-
 const BTN = 'px-4 py-2 rounded-lg text-sm font-semibold transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed'
 const OPTION_LABELS = ['A', 'B', 'C', 'D']
+
+const SET_LABELS = {
+  1: 'Set 1 — बच्चे (8-12 वर्ष)',
+  2: 'Set 2 — किशोर (13-17 वर्ष)',
+  3: 'Set 3 — युवा (18-25 वर्ष)',
+  4: 'Set 4 — युवा (26-35 वर्ष)',
+  5: 'Set 5 — प्रौढ़ (36-45 वर्ष)',
+  6: 'Set 6 — प्रौढ़ (46-55 वर्ष)',
+  7: 'Set 7 — वरिष्ठ (56-65 वर्ष)',
+  8: 'Set 8 — वरिष्ठ (66+ वर्ष)',
+}
 
 export default function GameControls({ gameState }) {
   const [nameInput,    setNameInput]    = useState('')
   const [settingName,  setSettingName]  = useState(false)
   const [loadingQ,     setLoadingQ]     = useState(false)
-  const [showChangeQ,  setShowChangeQ]  = useState(false)
   const [confirmReset, setConfirmReset] = useState(false)
   const [confirmGameOver, setConfirmGameOver] = useState(false)
   const [confirmQuit,  setConfirmQuit]  = useState(false)
@@ -36,7 +44,7 @@ export default function GameControls({ gameState }) {
   async function handleLoadQuestion(level = currentLevel || 1) {
     setLoadingQ(true)
     try {
-      const q = await getPrimaryQuestion(level)
+      const q = await getPrimaryQuestion(level, gameState.selectedSet ?? 1)
       if (!q) { alert(`Level ${level} के लिए कोई प्रश्न नहीं मिला।`); return }
       const row = PRIZE_LADDER.find(r => r.level === level)
       await markQuestionUsed(level, q.id)
@@ -106,6 +114,21 @@ export default function GameControls({ gameState }) {
       {/* ── IDLE: Start game ── */}
       {phase === 'idle' && (
         <div className="space-y-3">
+          {/* Set selector */}
+          <div>
+            <label className="text-xs text-gray-500 mb-1.5 block uppercase tracking-widest">प्रश्न सेट चुनें</label>
+            <select
+              value={gameState.selectedSet ?? 1}
+              onChange={e => setSelectedSet(Number(e.target.value))}
+              className="w-full bg-navy-900 border border-white/10 rounded-lg px-3 py-2 text-sm text-white
+                         focus:outline-none focus:border-gold-500 font-devanagari"
+            >
+              {Object.entries(SET_LABELS).map(([num, label]) => (
+                <option key={num} value={num}>{label}</option>
+              ))}
+            </select>
+          </div>
+          {/* Contestant name */}
           <div className="flex gap-2">
             <input
               value={nameInput}
@@ -129,7 +152,7 @@ export default function GameControls({ gameState }) {
             disabled={loadingQ}
             className={`${BTN} w-full bg-blue-700 hover:bg-blue-600 text-white`}
           >
-            {loadingQ ? '⏳ लोड हो रहा है…' : '🎮 Level 1 शुरू करें'}
+            {loadingQ ? '⏳ लोड हो रहा है…' : `🎮 Set ${gameState.selectedSet ?? 1} — Level 1 शुरू करें`}
           </button>
         </div>
       )}
@@ -276,14 +299,6 @@ export default function GameControls({ gameState }) {
         </div>
       )}
 
-      {/* Change Question Modal */}
-      {showChangeQ && (
-        <ChangeQModal
-          level={currentLevel}
-          onClose={() => setShowChangeQ(false)}
-          gameState={gameState}
-        />
-      )}
     </div>
   )
 }

@@ -42,9 +42,8 @@ export function useTimer(gameState) {
     return () => clearInterval(interval)
   }, [timerEnabled, timerRunning, timerSeconds, timerStartedAt])
 
-  // Use the configured max (timerSeconds at start = 45, but safe if it changes)
-  const maxSeconds = gameState.timerSeconds > remaining ? gameState.timerSeconds : 45
-  const pct    = timerEnabled ? remaining / maxSeconds : 1
+  // Ring always shows progress out of 45 seconds (the full timer duration)
+  const pct = timerEnabled ? remaining / 45 : 1
   const urgent = timerEnabled && remaining <= 10
 
   return { remaining, pct, urgent }
