@@ -45,10 +45,13 @@ export default function AudiencePollModal({ questionId, pollStartedAt, optionA, 
   )
 
   useEffect(() => {
-    if (secondsLeft <= 0) return
+    // Always start the interval; each tick recomputes from the server timestamp
+    // so it is immune to stale-closure issues.
     const id = setInterval(() => {
       const elapsed = Math.floor((Date.now() - pollStartedAt) / 1000)
-      setSecondsLeft(Math.max(0, POLL_DURATION - elapsed))
+      const left = Math.max(0, POLL_DURATION - elapsed)
+      setSecondsLeft(left)
+      if (left === 0) clearInterval(id)
     }, 500)
     return () => clearInterval(id)
   }, [pollStartedAt])
