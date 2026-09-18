@@ -1,0 +1,478 @@
+{
+  "level_1": [
+    {
+      "id": "l1_q1",
+      "text": "दशलक्षण पर्व में कितने दिन होते हैं?",
+      "optionA": "5",
+      "optionB": "8",
+      "optionC": "10",
+      "optionD": "12",
+      "correctOption": "C",
+      "isPrimary": true,
+      "used": false
+    },
+    {
+      "id": "l1_q2",
+      "text": "जैन धर्म के प्रथम तीर्थंकर कौन हैं?",
+      "optionA": "पार्श्वनाथ",
+      "optionB": "महावीर स्वामी",
+      "optionC": "ऋषभदेव (आदिनाथ)",
+      "optionD": "नेमिनाथ",
+      "correctOption": "C",
+      "isPrimary": false,
+      "used": false
+    },
+    {
+      "id": "l1_q3",
+      "text": "जैन धर्म में 'अहिंसा' का क्या अर्थ है?",
+      "optionA": "सत्य बोलना",
+      "optionB": "किसी को कष्ट न देना",
+      "optionC": "दान देना",
+      "optionD": "उपवास करना",
+      "correctOption": "B",
+      "isPrimary": false,
+      "used": false
+    },
+    {
+      "id": "l1_q4",
+      "text": "भगवान महावीर का जन्म किस वर्ष हुआ था?",
+      "optionA": "599 ई.पू.",
+      "optionB": "527 ई.पू.",
+      "optionC": "468 ई.पू.",
+      "optionD": "623 ई.पू.",
+      "correctOption": "A",
+      "isPrimary": false,
+      "used": false
+    },
+    {
+      "id": "l1_q5",
+      "text": "जैन धर्म के अनुसार 'पंच परमेष्ठी' में कौन शामिल नहीं है?",
+      "optionA": "अरिहंत",
+      "optionB": "सिद्ध",
+      "optionC": "देव",
+      "optionD": "मुनि",
+      "correctOption": "C",
+      "isPrimary": false,
+      "used": false
+    },
+    {
+      "id": "l1_q6",
+      "text": "दशलक्षण पर्व जैन कैलेंडर के किस माह में आता है?",
+      "optionA": "श्रावण",
+      "optionB": "भाद्रपद",
+      "optionC": "आश्विन",
+      "optionD": "कार्तिक",
+      "correctOption": "B",
+      "isPrimary": false,
+      "used": false
+    }
+  ],
+  "level_2": [
+    {
+      "id": "l2_q1",
+      "text": "दशलक्षण के प्रथम लक्षण का नाम क्या है?",
+      "optionA": "उत्तम सत्य",
+      "optionB": "उत्तम क्षमा",
+      "optionC": "उत्तम मार्दव",
+      "optionD": "उत्तम आर्जव",
+      "correctOption": "B",
+      "isPrimary": true,
+      "used": false
+    },
+    {
+      "id": "l2_q2",
+      "text": "जैन धर्म के 24वें (अंतिम) तीर्थंकर कौन हैं?",
+      "optionA": "पार्श्वनाथ",
+      "optionB": "नेमिनाथ",
+      "optionC": "महावीर स्वामी",
+      "optionD": "शांतिनाथ",
+      "correctOption": "C",
+      "isPrimary": false,
+      "used": false
+    },
+    {
+      "id": "l2_q3",
+      "text": "'उत्तम सत्य' दशलक्षण का कौन सा लक्षण है?",
+      "optionA": "तीसरा",
+      "optionB": "चौथा",
+      "optionC": "पाँचवाँ",
+      "optionD": "छठा",
+      "correctOption": "C",
+      "isPrimary": false,
+      "used": false
+    },
+    {
+      "id": "l2_q4",
+      "text": "जैन धर्म में 'रत्नत्रय' किसे कहते हैं?",
+      "optionA": "सम्यक् दर्शन, ज्ञान, चारित्र",
+      "optionB": "अहिंसा, सत्य, अस्तेय",
+      "optionC": "दान, शील, तप",
+      "optionD": "पूजा, भक्ति, ध्यान",
+      "correctOption": "A",
+      "isPrimary": false,
+      "used": false
+    },
+    {
+      "id": "l2_q5",
+      "text": "जैन धर्म में 'श्रावक' किसे कहते हैं?",
+      "optionA": "जो वन में रहता है",
+      "optionB": "गृहस्थ जैन धर्मानुयायी",
+      "optionC": "जो मुनि दीक्षा ले चुका हो",
+      "optionD": "तीर्थंकर के शिष्य",
+      "correctOption": "B",
+      "isPrimary": false,
+      "used": false
+    },
+    {
+      "id": "l2_q6",
+      "text": "भगवान महावीर की माता का नाम क्या था?",
+      "optionA": "यशोदा",
+      "optionB": "त्रिशला",
+      "optionC": "प्रियदर्शना",
+      "optionD": "सुलोचना",
+      "correctOption": "B",
+      "isPrimary": false,
+      "used": false
+    }
+  ],
+  "level_3": [
+    {
+      "id": "l3_q1",
+      "text": "'उत्तम शौच' का अर्थ क्या है?",
+      "optionA": "शरीर की सफाई",
+      "optionB": "मन की पवित्रता — लोभ का अभाव",
+      "optionC": "वस्त्रों की स्वच्छता",
+      "optionD": "जल से स्नान",
+      "correctOption": "B",
+      "isPrimary": true,
+      "used": false
+    },
+    {
+      "id": "l3_q2",
+      "text": "जैन धर्म में 'अनेकांतवाद' का क्या तात्पर्य है?",
+      "optionA": "एक ईश्वर में विश्वास",
+      "optionB": "सत्य के अनेक पहलू होते हैं",
+      "optionC": "अहिंसा का पालन",
+      "optionD": "कर्म से मुक्ति",
+      "correctOption": "B",
+      "isPrimary": false,
+      "used": false
+    },
+    {
+      "id": "l3_q3",
+      "text": "दशलक्षण में 'उत्तम त्याग' कौन सा लक्षण है?",
+      "optionA": "सातवाँ",
+      "optionB": "आठवाँ",
+      "optionC": "नौवाँ",
+      "optionD": "दसवाँ",
+      "correctOption": "B",
+      "isPrimary": false,
+      "used": false
+    },
+    {
+      "id": "l3_q4",
+      "text": "जैन धर्म के अनुसार आत्मा की कितनी अवस्थाएँ होती हैं?",
+      "optionA": "2",
+      "optionB": "4",
+      "optionC": "14",
+      "optionD": "24",
+      "correctOption": "C",
+      "isPrimary": false,
+      "used": false
+    },
+    {
+      "id": "l3_q5",
+      "text": "भगवान महावीर को किस वृक्ष के नीचे केवलज्ञान प्राप्त हुआ?",
+      "optionA": "पीपल",
+      "optionB": "बरगद",
+      "optionC": "साल",
+      "optionD": "नीम",
+      "correctOption": "C",
+      "isPrimary": false,
+      "used": false
+    },
+    {
+      "id": "l3_q6",
+      "text": "जैन धर्म में 'सल्लेखना' का क्या अर्थ है?",
+      "optionA": "भोजन त्याग द्वारा शरीर का विसर्जन",
+      "optionB": "तीर्थयात्रा",
+      "optionC": "पूजा विधि",
+      "optionD": "दान का एक प्रकार",
+      "correctOption": "A",
+      "isPrimary": false,
+      "used": false
+    }
+  ],
+  "level_4": [
+    {
+      "id": "l4_q1",
+      "text": "'उत्तम ब्रह्मचर्य' दशलक्षण का कौन सा लक्षण है?",
+      "optionA": "सातवाँ",
+      "optionB": "आठवाँ",
+      "optionC": "नौवाँ",
+      "optionD": "दसवाँ",
+      "correctOption": "C",
+      "isPrimary": true,
+      "used": false
+    },
+    {
+      "id": "l4_q2",
+      "text": "जैन धर्म की दो प्रमुख शाखाएँ कौन सी हैं?",
+      "optionA": "वैष्णव और शैव",
+      "optionB": "दिगम्बर और श्वेताम्बर",
+      "optionC": "हीनयान और महायान",
+      "optionD": "स्थानकवासी और तेरापंथी",
+      "correctOption": "B",
+      "isPrimary": false,
+      "used": false
+    },
+    {
+      "id": "l4_q3",
+      "text": "जैन दर्शन में 'नवतत्त्व' में 'आस्रव' का क्या अर्थ है?",
+      "optionA": "कर्मों का क्षय",
+      "optionB": "कर्मों का आत्मा में प्रवेश",
+      "optionC": "कर्मों का रोकना",
+      "optionD": "मोक्ष की प्राप्ति",
+      "correctOption": "B",
+      "isPrimary": false,
+      "used": false
+    },
+    {
+      "id": "l4_q4",
+      "text": "तत्त्वार्थ सूत्र के रचयिता कौन हैं?",
+      "optionA": "कुन्दकुन्द आचार्य",
+      "optionB": "उमास्वामी",
+      "optionC": "हेमचन्द्राचार्य",
+      "optionD": "समन्तभद्र",
+      "correctOption": "B",
+      "isPrimary": false,
+      "used": false
+    },
+    {
+      "id": "l4_q5",
+      "text": "जैन धर्म में 'संवर' का अर्थ क्या है?",
+      "optionA": "नए कर्मों का आगमन रोकना",
+      "optionB": "पुराने कर्मों को नष्ट करना",
+      "optionC": "दान देना",
+      "optionD": "व्रत लेना",
+      "correctOption": "A",
+      "isPrimary": false,
+      "used": false
+    },
+    {
+      "id": "l4_q6",
+      "text": "दशलक्षण में 'उत्तम संयम' कौन सा लक्षण है?",
+      "optionA": "पाँचवाँ",
+      "optionB": "छठा",
+      "optionC": "सातवाँ",
+      "optionD": "आठवाँ",
+      "correctOption": "B",
+      "isPrimary": false,
+      "used": false
+    }
+  ],
+  "level_5": [
+    {
+      "id": "l5_q1",
+      "text": "भगवान महावीर के प्रथम गणधर कौन थे?",
+      "optionA": "गौतम स्वामी (इन्द्रभूति)",
+      "optionB": "सुधर्मस्वामी",
+      "optionC": "जम्बूस्वामी",
+      "optionD": "स्थूलभद्र",
+      "correctOption": "A",
+      "isPrimary": true,
+      "used": false
+    },
+    {
+      "id": "l5_q2",
+      "text": "जैन धर्म में 'द्रव्य' कितने प्रकार के होते हैं?",
+      "optionA": "4",
+      "optionB": "5",
+      "optionC": "6",
+      "optionD": "7",
+      "correctOption": "C",
+      "isPrimary": false,
+      "used": false
+    },
+    {
+      "id": "l5_q3",
+      "text": "'उत्तम आकिंचन्य' का संबंध किससे है?",
+      "optionA": "अपरिग्रह — किसी भी वस्तु में आसक्ति न रखना",
+      "optionB": "उपवास करना",
+      "optionC": "सत्य वचन बोलना",
+      "optionD": "ध्यान लगाना",
+      "correctOption": "A",
+      "isPrimary": false,
+      "used": false
+    },
+    {
+      "id": "l5_q4",
+      "text": "जैन मंदिर में मूर्ति पर किस वस्तु का लेप लगाया जाता है?",
+      "optionA": "दही",
+      "optionB": "केसर",
+      "optionC": "चंदन",
+      "optionD": "हल्दी",
+      "correctOption": "C",
+      "isPrimary": false,
+      "used": false
+    },
+    {
+      "id": "l5_q5",
+      "text": "जैन धर्म में 'निर्जरा' का अर्थ क्या है?",
+      "optionA": "नए कर्मों का बंधन",
+      "optionB": "संचित कर्मों का क्षय",
+      "optionC": "मोक्ष की प्राप्ति",
+      "optionD": "समाधि लगाना",
+      "correctOption": "B",
+      "isPrimary": false,
+      "used": false
+    },
+    {
+      "id": "l5_q6",
+      "text": "दशलक्षण पर्व में 'अनंत चतुर्दशी' किस दिन मनाई जाती है?",
+      "optionA": "पहले दिन",
+      "optionB": "पाँचवें दिन",
+      "optionC": "दसवें दिन",
+      "optionD": "चौदहवें दिन",
+      "correctOption": "C",
+      "isPrimary": false,
+      "used": false
+    }
+  ],
+  "level_6": [
+    {
+      "id": "l6_q1",
+      "text": "जैन आगम साहित्य में 'आचारांग सूत्र' किसका वर्णन करता है?",
+      "optionA": "ब्रह्माण्ड की उत्पत्ति",
+      "optionB": "मुनियों के आचार-व्यवहार और महावीर का जीवन",
+      "optionC": "गणित और ज्योतिष",
+      "optionD": "राजनीति शास्त्र",
+      "correctOption": "B",
+      "isPrimary": true,
+      "used": false
+    },
+    {
+      "id": "l6_q2",
+      "text": "'समयसार' ग्रंथ के रचयिता कौन हैं?",
+      "optionA": "उमास्वामी",
+      "optionB": "हेमचन्द्राचार्य",
+      "optionC": "कुन्दकुन्द आचार्य",
+      "optionD": "पूज्यपाद स्वामी",
+      "correctOption": "C",
+      "isPrimary": false,
+      "used": false
+    },
+    {
+      "id": "l6_q3",
+      "text": "जैन धर्म में 'लेश्या' का क्या अर्थ है?",
+      "optionA": "आत्मा का रंग — कर्म की तीव्रता से निर्धारित",
+      "optionB": "मन की शक्ति",
+      "optionC": "शरीर का बल",
+      "optionD": "ज्ञान का प्रकार",
+      "correctOption": "A",
+      "isPrimary": false,
+      "used": false
+    },
+    {
+      "id": "l6_q4",
+      "text": "जैन दर्शन में 'स्याद्वाद' के कितने भंग (नय) होते हैं?",
+      "optionA": "5",
+      "optionB": "7",
+      "optionC": "9",
+      "optionD": "12",
+      "correctOption": "B",
+      "isPrimary": false,
+      "used": false
+    },
+    {
+      "id": "l6_q5",
+      "text": "भगवान महावीर ने कितने वर्षों तक साधना (तप) की?",
+      "optionA": "10 वर्ष",
+      "optionB": "12 वर्ष",
+      "optionC": "14 वर्ष",
+      "optionD": "16 वर्ष",
+      "correctOption": "B",
+      "isPrimary": false,
+      "used": false
+    },
+    {
+      "id": "l6_q6",
+      "text": "दिगम्बर जैन मुनि वस्त्र क्यों नहीं धारण करते?",
+      "optionA": "परिग्रह (आसक्ति) के त्याग के प्रतीक स्वरूप",
+      "optionB": "गर्मी से बचने के लिए",
+      "optionC": "यह उनकी परम्परा है",
+      "optionD": "वस्त्र अपवित्र होते हैं",
+      "correctOption": "A",
+      "isPrimary": false,
+      "used": false
+    }
+  ],
+  "level_7": [
+    {
+      "id": "l7_q1",
+      "text": "जैन दर्शन में 'निश्चय नय' और 'व्यवहार नय' में क्या मूलभूत अंतर है?",
+      "optionA": "निश्चय नय आत्मा के शुद्ध स्वरूप को देखता है; व्यवहार नय संसारी दृष्टि से",
+      "optionB": "निश्चय नय व्यावहारिक नियम हैं; व्यवहार नय आत्म-चिंतन",
+      "optionC": "दोनों एक ही हैं",
+      "optionD": "निश्चय नय केवल मुनियों के लिए है",
+      "correctOption": "A",
+      "isPrimary": true,
+      "used": false
+    },
+    {
+      "id": "l7_q2",
+      "text": "उत्तम क्षमा का स्वरूप क्या है — जैन शास्त्रों के अनुसार?",
+      "optionA": "क्रोध उत्पन्न होने पर भी उसे प्रकट न करना",
+      "optionB": "क्रोध का मूल से नाश — परिणामों में शांति",
+      "optionC": "शत्रु को माफ कर देना",
+      "optionD": "व्रत लेकर क्षमा माँगना",
+      "correctOption": "B",
+      "isPrimary": false,
+      "used": false
+    },
+    {
+      "id": "l7_q3",
+      "text": "षट्द्रव्य में 'काल द्रव्य' की विशेषता क्या है?",
+      "optionA": "यह सर्वव्यापी है",
+      "optionB": "यह परिवर्तन का सहायक कारण है; इसके प्रदेश नहीं होते",
+      "optionC": "यह आत्मा का एक भाग है",
+      "optionD": "यह केवल लोक में है",
+      "correctOption": "B",
+      "isPrimary": false,
+      "used": false
+    },
+    {
+      "id": "l7_q4",
+      "text": "समयसार में 'परम समाधि' की परिभाषा क्या है?",
+      "optionA": "शरीर का त्याग",
+      "optionB": "आत्मा का शुद्ध-चैतन्य स्वभाव में निश्चल स्थिति",
+      "optionC": "ध्यान की एक मुद्रा",
+      "optionD": "तीर्थयात्रा से प्राप्त अवस्था",
+      "correctOption": "B",
+      "isPrimary": false,
+      "used": false
+    },
+    {
+      "id": "l7_q5",
+      "text": "जैन कर्म सिद्धांत में 'मोहनीय कर्म' को सर्वाधिक हानिकारक क्यों माना जाता है?",
+      "optionA": "यह शरीर को कमजोर करता है",
+      "optionB": "यह सम्यक्त्व और चारित्र दोनों को आवृत करता है, मोक्ष-मार्ग में सबसे बड़ा अवरोध",
+      "optionC": "यह ज्ञान को नष्ट करता है",
+      "optionD": "यह आयु को कम करता है",
+      "correctOption": "B",
+      "isPrimary": false,
+      "used": false
+    },
+    {
+      "id": "l7_q6",
+      "text": "माधवगंज परिवार दशलक्षण महापर्व का मुख्य संदेश क्या है?",
+      "optionA": "धन संग्रह और समृद्धि",
+      "optionB": "दस उत्तम लक्षणों को आत्मसात कर जीवन को धर्ममय बनाना",
+      "optionC": "केवल पूजा-पाठ",
+      "optionD": "सामाजिक प्रतिष्ठा प्राप्त करना",
+      "correctOption": "B",
+      "isPrimary": false,
+      "used": false
+    }
+  ]
+}

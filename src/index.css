@@ -1,0 +1,83 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700;800&family=Noto+Sans:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --gold: #c9a84c;
+  --gold-light: #e8c05a;
+  --navy-deep: #020818;
+  --navy: #050d2d;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Noto Sans Devanagari', 'Noto Sans', sans-serif;
+  background-color: var(--navy);
+  color: #fff;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+#root {
+  width: 100%;
+  min-height: 100svh;
+}
+
+/* KBC hexagon/glow effect used across screens */
+.kbc-glow {
+  box-shadow: 0 0 20px rgba(201, 168, 76, 0.4), 0 0 60px rgba(201, 168, 76, 0.15);
+}
+
+/* Option button base styles */
+.option-btn {
+  @apply relative w-full text-left font-devanagari font-medium text-base sm:text-lg
+    py-3 px-4 sm:px-6 rounded-lg border border-gold-600/40
+    transition-all duration-300 cursor-pointer select-none
+    bg-option-idle text-white;
+  clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
+}
+
+.option-btn:hover {
+  @apply bg-option-hover border-gold-400/60;
+}
+
+.option-btn.selected {
+  @apply bg-option-selected border-yellow-400;
+  box-shadow: 0 0 16px rgba(217, 119, 6, 0.5);
+}
+
+.option-btn.correct {
+  @apply bg-option-correct border-green-400;
+  box-shadow: 0 0 16px rgba(21, 128, 61, 0.6);
+}
+
+.option-btn.wrong {
+  @apply bg-option-wrong border-red-400;
+  box-shadow: 0 0 16px rgba(185, 28, 28, 0.5);
+}
+
+/* Scrollbar for admin panel */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #0a1128; }
+::-webkit-scrollbar-thumb { background: #c9a84c44; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #c9a84c88; }
+
+/* Prize ladder item shimmer */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.prize-shimmer {
+  background: linear-gradient(90deg, transparent 25%, rgba(201,168,76,0.15) 50%, transparent 75%);
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+}
