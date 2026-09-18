@@ -50,7 +50,9 @@ export const INITIAL_GAME_STATE = {
   audiencePollB: 0,
   audiencePollC: 0,
   audiencePollD: 0,
-  showAudiencePoll: false,
+  showAudiencePoll:   false,
+  audiencePollActive: false,   // true while the 30-s voting window is open
+  pollStartedAt:      0,       // epoch ms when poll was started (for countdown)
   showExpertOverlay: false,
   expertMessage:     '',
 
@@ -217,7 +219,24 @@ export async function triggerAskAudience(pollA, pollB, pollC, pollD) {
   })
 }
 
-/** Hide the audience poll overlay (called after admin closes it) */
+/** Open the 30-second audience voting window (shows popup on audience screens) */
+export async function startAudiencePoll() {
+  await update(gsRef(), {
+    audiencePollActive: true,
+    pollStartedAt:      Date.now(),
+    updatedAt:          Date.now(),
+  })
+}
+
+/** Close the voting window (called by admin or auto after 30 s) */
+export async function stopAudiencePoll() {
+  await update(gsRef(), {
+    audiencePollActive: false,
+    updatedAt:          Date.now(),
+  })
+}
+
+/** Hide the audience poll results overlay (called after admin closes it) */
 export async function hideAudiencePoll() {
   await update(gsRef(), {
     showAudiencePoll: false,
