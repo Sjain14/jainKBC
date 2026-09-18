@@ -4,8 +4,8 @@
 width="1147px" height="1147px" viewBox="0 0 1147 1147" enable-background="new 0 0 1147 1147" xml:space="preserve">
 <rect x="0" y="0" width="1147" height="1147" fill="rgb(255,255,255)" /><g transform="translate(62,62)"><g><defs>
     <radialGradient id="grad">
-    <stop offset="5%" stop-color="rgb(255,230,129)" />
-    <stop offset="95%" stop-color="rgb(255,255,255)" />
+    <stop offset="5%" stop-color="rgb(20,24,40)" />
+    <stop offset="95%" stop-color="rgb(10,14,26)" />
     </radialGradient>
 <mask id="gmask"><g>
 <g transform="translate(341,0) scale(0.062,0.062)"><g transform="" style="fill: rgb(255, 255, 255);">
