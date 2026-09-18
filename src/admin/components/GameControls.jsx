@@ -18,14 +18,9 @@ const BTN = 'px-4 py-2 rounded-lg text-sm font-semibold transition-all active:sc
 const OPTION_LABELS = ['A', 'B', 'C', 'D']
 
 const SET_LABELS = {
-  1: 'Set 1 — बच्चे (8-12 वर्ष)',
-  2: 'Set 2 — किशोर (13-17 वर्ष)',
-  3: 'Set 3 — युवा (18-25 वर्ष)',
-  4: 'Set 4 — युवा (26-35 वर्ष)',
-  5: 'Set 5 — प्रौढ़ (36-45 वर्ष)',
-  6: 'Set 6 — प्रौढ़ (46-55 वर्ष)',
-  7: 'Set 7 — वरिष्ठ (56-65 वर्ष)',
-  8: 'Set 8 — वरिष्ठ (66+ वर्ष)',
+  1: '10 साल तक के बच्चे',
+  2: '10 से 13 साल के बच्चे',
+  3: '13 से 18 साल के बच्चे',
 }
 
 export default function GameControls({ gameState }) {
@@ -152,7 +147,7 @@ export default function GameControls({ gameState }) {
             disabled={loadingQ}
             className={`${BTN} w-full bg-blue-700 hover:bg-blue-600 text-white`}
           >
-            {loadingQ ? '⏳ लोड हो रहा है…' : `🎮 Set ${gameState.selectedSet ?? 1} — Level 1 शुरू करें`}
+            {loadingQ ? '⏳ लोड हो रहा है…' : `🎮 ${SET_LABELS[gameState.selectedSet ?? 1] || `Set ${gameState.selectedSet ?? 1}`} — Level 1 शुरू करें`}
           </button>
         </div>
       )}

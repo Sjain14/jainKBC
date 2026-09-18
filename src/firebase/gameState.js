@@ -19,7 +19,7 @@ export const INITIAL_GAME_STATE = {
   currentLevel: 0,         // 1-7
   contestantName: '',
 
-  // Selected question set (1-8)
+  // Selected question set (1-3)
   selectedSet: 1,
 
   // Current question (written by admin when loading a question)
@@ -108,7 +108,7 @@ export async function loadQuestion(level, question, levelTitle) {
   })
 }
 
-/** Set selected question set (1-8) */
+/** Set selected question set (1-3) */
 export async function setSelectedSet(set) {
   await update(gsRef(), { selectedSet: set, updatedAt: Date.now() })
 }
