@@ -26,7 +26,7 @@ export const SHARE_MESSAGE_TEXT = `✨ *जय जिनेन्द्र!* ✨
 /**
  * Trigger native share or fallback to WhatsApp / clipboard
  */
-export async function shareGame({ onCopied } = {}) {
+export async function shareGame({ onCopied: _onCopied } = {}) {
   const sharePayload = {
     title: SHARE_DATA.title,
     text: SHARE_MESSAGE_TEXT,
