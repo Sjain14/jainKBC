@@ -32,17 +32,7 @@ export default function AdminApp() {
   const { gameState, loading: gsLoading } = useGameState()
   const connected = useConnectionStatus()
 
-  // ── Redirect to login if not authenticated ──────────────────────────────
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-[#0a1128] flex items-center justify-center">
-        <p className="text-gold-400 animate-pulse">Checking auth…</p>
-      </div>
-    )
-  }
-  if (!user) return <Navigate to="/admin/login" replace />
-
-  // ── Keyboard shortcuts ──────────────────────────────────────────────────
+  // ── Keyboard shortcuts — must be declared before any conditional return ──
   const handleKey = useCallback((e) => {
     if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return
     const phase = gameState.phase
@@ -74,6 +64,16 @@ export default function AdminApp() {
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
   }, [handleKey])
+
+  // ── Redirect to login if not authenticated ──────────────────────────────
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-[#0a1128] flex items-center justify-center">
+        <p className="text-gold-400 animate-pulse">Checking auth…</p>
+      </div>
+    )
+  }
+  if (!user) return <Navigate to="/admin/login" replace />
 
   if (gsLoading) {
     return (
