@@ -12,6 +12,7 @@ import PrizeLadder          from '../components/PrizeLadder.jsx'
 import LifelineBar          from '../components/LifelineBar.jsx'
 import TimerDisplay         from '../components/TimerDisplay.jsx'
 import AudiencePoll         from '../components/AudiencePoll.jsx'
+import AudiencePollModal    from '../components/AudiencePollModal.jsx'
 import AudienceVoteButtons  from '../components/AudienceVoteButtons.jsx'
 import ExpertOverlay        from '../components/ExpertOverlay.jsx'
 import PausedOverlay        from '../components/PausedOverlay.jsx'
@@ -28,6 +29,7 @@ export default function QuestionScreen({ gameState, soundManager }) {
     questionId, timerEnabled,
     lifelineAskAudienceUsed, lifelineChangeQUsed, lifelineAskExpertUsed,
     showAudiencePoll, showExpertOverlay, expertMessage,
+    audiencePollActive, pollStartedAt,
     gamePaused,
     audiencePollA, audiencePollB, audiencePollC, audiencePollD,
   } = gameState
@@ -119,8 +121,8 @@ export default function QuestionScreen({ gameState, soundManager }) {
           ))}
         </div>
 
-        {/* ─ Audience vote buttons (only during active question, before lifeline used) ─ */}
-        {gameState.phase === 'question' && !lifelineAskAudienceUsed && !showCorrectAnswer && (
+        {/* ─ Audience vote buttons (only during active question, before lifeline used and no poll popup) ─ */}
+        {gameState.phase === 'question' && !lifelineAskAudienceUsed && !showCorrectAnswer && !audiencePollActive && (
           <AudienceVoteButtons questionId={questionId} />
         )}
 
@@ -134,7 +136,17 @@ export default function QuestionScreen({ gameState, soundManager }) {
         </div>
       </div>
 
-      {/* ── Audience Poll Overlay ── */}
+      {/* ── Audience Poll Voting Modal (30-sec window) ── */}
+      {audiencePollActive && questionId && (
+        <AudiencePollModal
+          questionId={questionId}
+          pollStartedAt={pollStartedAt}
+          optionA={optionA} optionB={optionB}
+          optionC={optionC} optionD={optionD}
+        />
+      )}
+
+      {/* ── Audience Poll Results Overlay ── */}
       {showAudiencePoll && (
         <AudiencePoll
           pollA={audiencePollA} pollB={audiencePollB}
