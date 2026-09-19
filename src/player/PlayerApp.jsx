@@ -6,8 +6,9 @@
 
 import { useEffect, useRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { useGameState }    from '../hooks/useGameState.js'
-import { useSoundManager } from '../hooks/useSoundManager.js'
+import { useGameState }      from '../hooks/useGameState.js'
+import { useSoundManager }   from '../hooks/useSoundManager.js'
+import { useAnonymousAuth }  from '../hooks/useAnonymousAuth.js'
 import IdleScreen          from './screens/IdleScreen.jsx'
 import QuestionScreen      from './screens/QuestionScreen.jsx'
 import GameOverScreen      from './screens/GameOverScreen.jsx'
@@ -17,6 +18,7 @@ import QuitScreen          from './screens/QuitScreen.jsx'
 export default function PlayerApp() {
   const { gameState, loading } = useGameState()
   const { play, stop, stopAll, fadeOut } = useSoundManager()
+  const { uid } = useAnonymousAuth()
   const prevPhase = useRef(null)
 
   // ── Sound transitions on phase change ──────────────────────────────────
@@ -74,7 +76,7 @@ export default function PlayerApp() {
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.4 }} className="relative z-10"
           >
-            <QuestionScreen gameState={gameState} soundManager={{ play, stop, fadeOut }} />
+            <QuestionScreen gameState={gameState} soundManager={{ play, stop, fadeOut }} uid={uid} />
           </motion.div>
         )}
 

@@ -82,6 +82,11 @@ function normalizeQuestions(data) {
       } else {
         const match = setVal.match(/(\d+)/)
         const setNum = match ? parseInt(match[1], 10) : 1
+        // Extract the age group label from inside the parentheses, e.g.
+        // "5 (13 से 18 साल के बच्चे)" → "13 से 18 साल के बच्चे"
+        // If no parentheses (plain number), use the raw setVal as the label.
+        const parenMatch = setVal.match(/\(([^)]+)\)/)
+        const ageGroup = parenMatch ? parenMatch[1].trim() : setVal
         const levelKey = `level_${level}`
 
         if (grouped[levelKey]) {
@@ -96,6 +101,7 @@ function normalizeQuestions(data) {
             description: q.explanation || '',
             isPrimary: true,
             set: setNum,
+            ageGroup,
             level: level,
             used: false
           })

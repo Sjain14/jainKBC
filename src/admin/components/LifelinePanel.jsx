@@ -8,7 +8,9 @@
  *   3. Ask the Expert — admin types expert message, shown on player screen
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { ref, onValue }                 from 'firebase/database'
+import { db }                           from '../../firebase/config.js'
 import {
   triggerAskAudience, hideAudiencePoll,
   startAudiencePoll, stopAudiencePoll,
@@ -29,25 +31,43 @@ export default function LifelinePanel({ gameState }) {
     questionId: currentQuestionId,
   } = gameState
 
-  const [collecting,  setCollecting]  = useState(false)
-  const [expertMsg,   setExpertMsg]   = useState('')
-  const [showChangeQ, setShowChangeQ] = useState(false)
-  const [pollSecsLeft, setPollSecsLeft] = useState(0)
+  const [collecting,    setCollecting]    = useState(false)
+  const [expertMsg,     setExpertMsg]     = useState('')
+  const [showChangeQ,   setShowChangeQ]   = useState(false)
+  const [pollSecsLeft,  setPollSecsLeft]  = useState(0)
+  const [liveVoteCount, setLiveVoteCount] = useState(0)
+  // Ref to handleCollectAndShow so the countdown useEffect can call it
+  // without a stale closure (functions defined below use current state).
+  const collectRef = useRef(null)
 
   const isQuestion = phase === 'question'
 
-  // ── Countdown display in admin panel ──────────────────────────────────────
+  // ── Countdown display + auto-collect when timer hits 0 ────────────────────
   useEffect(() => {
     if (!audiencePollActive || !pollStartedAt) { setPollSecsLeft(0); return }
     const tick = () => {
       const left = Math.max(0, POLL_DURATION - Math.floor((Date.now() - pollStartedAt) / 1000))
       setPollSecsLeft(left)
-      if (left === 0) stopAudiencePoll()   // auto-close when time is up
+      if (left === 0) {
+        clearInterval(id)
+        // Auto-collect: call through ref so we always get the latest function
+        if (collectRef.current) collectRef.current()
+      }
     }
-    tick()
     const id = setInterval(tick, 500)
+    tick()   // fire immediately so UI shows correct value straight away
     return () => clearInterval(id)
   }, [audiencePollActive, pollStartedAt])
+
+  // ── Live vote count during active poll ────────────────────────────────────
+  useEffect(() => {
+    if (!audiencePollActive || !currentQuestionId) { setLiveVoteCount(0); return }
+    const votesRef = ref(db, `audienceVotes/${currentQuestionId}`)
+    const unsub = onValue(votesRef, (snap) => {
+      setLiveVoteCount(snap.exists() ? Object.keys(snap.val()).length : 0)
+    })
+    return () => unsub()
+  }, [audiencePollActive, currentQuestionId])
 
   // Phase 1: open the voting window on all audience screens
   async function handleStartPoll() {
@@ -56,6 +76,7 @@ export default function LifelinePanel({ gameState }) {
 
   // Phase 2: close the window, collect votes, show results bar chart
   async function handleCollectAndShow() {
+    if (collecting) return   // prevent double-fire from auto + manual click
     setCollecting(true)
     try {
       await stopAudiencePoll()
@@ -65,6 +86,8 @@ export default function LifelinePanel({ gameState }) {
       setCollecting(false)
     }
   }
+  // Keep ref in sync so the countdown useEffect can invoke latest version
+  collectRef.current = handleCollectAndShow
 
   async function handleExpert() {
     if (!expertMsg.trim()) return
@@ -101,11 +124,14 @@ export default function LifelinePanel({ gameState }) {
               </>
             )}
 
-            {/* Phase 1 active: countdown + collect button */}
+            {/* Phase 1 active: countdown + live count + collect button */}
             {audiencePollActive && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] text-gray-400">⏳ Voting चल रहा है…</span>
+                  <span className="text-[11px] text-gray-400">
+                    ⏳ Voting चल रहा है…
+                    <span className="ml-2 text-blue-400 font-semibold">🗳️ {liveVoteCount} votes</span>
+                  </span>
                   <span className={`text-sm font-bold tabular-nums ${pollSecsLeft <= 8 ? 'text-red-400' : pollSecsLeft <= 15 ? 'text-yellow-400' : 'text-green-400'}`}>
                     {pollSecsLeft}s
                   </span>
@@ -113,7 +139,7 @@ export default function LifelinePanel({ gameState }) {
                 {/* Progress bar */}
                 <div className="w-full bg-navy-900 rounded-full h-1.5 overflow-hidden">
                   <div
-                    className={`h-full rounded-full transition-all ${pollSecsLeft <= 8 ? 'bg-red-500' : pollSecsLeft <= 15 ? 'bg-yellow-500' : 'bg-green-500'}`}
+                    className={`h-full rounded-full ${pollSecsLeft <= 8 ? 'bg-red-500' : pollSecsLeft <= 15 ? 'bg-yellow-500' : 'bg-green-500'}`}
                     style={{ width: `${(pollSecsLeft / POLL_DURATION) * 100}%`, transition: 'width 0.5s linear' }}
                   />
                 </div>
@@ -127,6 +153,7 @@ export default function LifelinePanel({ gameState }) {
                   </button>
                   <button
                     onClick={stopAudiencePoll}
+                    disabled={collecting}
                     className={`${BTN} bg-gray-700 hover:bg-gray-600 text-white`}
                   >
                     रद्द
@@ -135,15 +162,32 @@ export default function LifelinePanel({ gameState }) {
               </div>
             )}
 
-            {/* Phase 2: results are showing */}
+            {/* Phase 2: results collected and showing */}
             {showAudiencePoll && (
-              <div className="flex gap-2">
-                <span className="text-[11px] text-green-400 flex-1 self-center">✅ Results दिख रहे हैं</span>
+              <div className="space-y-2">
+                {/* Mini result bars in admin panel */}
+                {[
+                  { lbl: 'A', pct: gameState.audiencePollA, color: 'bg-blue-500'   },
+                  { lbl: 'B', pct: gameState.audiencePollB, color: 'bg-yellow-500' },
+                  { lbl: 'C', pct: gameState.audiencePollC, color: 'bg-green-500'  },
+                  { lbl: 'D', pct: gameState.audiencePollD, color: 'bg-red-500'    },
+                ].map(({ lbl, pct, color }) => (
+                  <div key={lbl} className="flex items-center gap-2">
+                    <span className="text-[11px] font-bold text-gray-400 w-4">{lbl}</span>
+                    <div className="flex-1 bg-navy-900 rounded-full h-3 overflow-hidden">
+                      <div
+                        className={`h-full rounded-full ${color}`}
+                        style={{ width: `${pct ?? 0}%` }}
+                      />
+                    </div>
+                    <span className="text-[11px] text-gray-300 tabular-nums w-8 text-right">{pct ?? 0}%</span>
+                  </div>
+                ))}
                 <button
                   onClick={hideAudiencePoll}
-                  className={`${BTN} bg-gray-700 hover:bg-gray-600 text-white`}
+                  className={`${BTN} w-full bg-gray-700 hover:bg-gray-600 text-white mt-1`}
                 >
-                  Hide
+                  Hide Results
                 </button>
               </div>
             )}

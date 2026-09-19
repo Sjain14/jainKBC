@@ -14,8 +14,8 @@ const OPTION_COLORS = {
   D: { base: 'border-red-600/50 bg-red-900/20 hover:bg-red-800/40 text-red-300',    voted: 'border-red-400 bg-red-700/60 text-white ring-2 ring-red-400/50' },
 }
 
-export default function AudienceVoteButtons({ questionId }) {
-  const { myVote, voteCounts, totalVotes, castVote, hasVoted } = useAudienceVote(questionId)
+export default function AudienceVoteButtons({ questionId, uid }) {
+  const { myVote, voteCounts, totalVotes, castVote, hasVoted } = useAudienceVote(questionId, uid)
 
   if (!questionId) return null
 

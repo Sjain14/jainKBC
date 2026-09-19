@@ -4,7 +4,7 @@
  *          Game Over, Quit, Winner, Reset.
  */
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   resetGameState, setContestantName, loadQuestion, selectOption,
   revealAnswer, advanceToResult, declareWinner, gameOver, quitGame,
@@ -12,24 +12,36 @@ import {
 } from '../../firebase/gameState.js'
 import { getRemainingSeconds } from '../../hooks/useTimer.js'
 import { pauseTimer, resumeTimer } from '../../firebase/gameState.js'
-import { getPrimaryQuestion, markQuestionUsed } from '../../firebase/questions.js'
+import { getPrimaryQuestion, markQuestionUsed, getAvailableSets } from '../../firebase/questions.js'
 import { PRIZE_LADDER } from '../../data/prizeLadder.js'
 const BTN = 'px-4 py-2 rounded-lg text-sm font-semibold transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed'
 const OPTION_LABELS = ['A', 'B', 'C', 'D']
 
-const SET_LABELS = {
-  1: '10 साल तक के बच्चे',
-  2: '10 से 13 साल के बच्चे',
-  3: '13 से 18 साल के बच्चे',
-}
-
 export default function GameControls({ gameState }) {
-  const [nameInput,    setNameInput]    = useState('')
-  const [settingName,  setSettingName]  = useState(false)
-  const [loadingQ,     setLoadingQ]     = useState(false)
-  const [confirmReset, setConfirmReset] = useState(false)
-  const [confirmGameOver, setConfirmGameOver] = useState(false)
-  const [confirmQuit,  setConfirmQuit]  = useState(false)
+  const [nameInput,         setNameInput]         = useState('')
+  const [settingName,       setSettingName]        = useState(false)
+  const [loadingQ,          setLoadingQ]           = useState(false)
+  const [confirmReset,      setConfirmReset]       = useState(false)
+  const [confirmGameOver,   setConfirmGameOver]    = useState(false)
+  const [confirmQuit,       setConfirmQuit]        = useState(false)
+
+  // ── Dynamic age-group/set data loaded from Firebase ───────────────────────
+  // ageGroups: [{ ageGroup: string, sets: number[] }]  derived from live question bank
+  const [ageGroups,   setAgeGroups]   = useState([])   // populated on mount
+  const [ageGroupIdx, setAgeGroupIdx] = useState(0)    // index into ageGroups
+
+  useEffect(() => {
+    getAvailableSets().then(groups => {
+      setAgeGroups(groups)
+      // Restore the correct age-group selection from the current Firebase selectedSet
+      const currentSet = gameState.selectedSet ?? 1
+      const idx = groups.findIndex(g => g.sets.includes(currentSet))
+      setAgeGroupIdx(idx === -1 ? 0 : idx)
+    }).catch(() => {
+      // If Firebase is unreachable yet, leave empty — dropdowns show loading state
+    })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // run once on mount; gameState.selectedSet is only needed for initial sync
 
   const { phase, currentLevel, selectedOption, showCorrectAnswer,
     timerEnabled, timerRunning, timerSeconds, correctOption } = gameState
@@ -109,20 +121,45 @@ export default function GameControls({ gameState }) {
       {/* ── IDLE: Start game ── */}
       {phase === 'idle' && (
         <div className="space-y-3">
-          {/* Set selector */}
-          <div>
-            <label className="text-xs text-gray-500 mb-1.5 block uppercase tracking-widest">प्रश्न सेट चुनें</label>
-            <select
-              value={gameState.selectedSet ?? 1}
-              onChange={e => setSelectedSet(Number(e.target.value))}
-              className="w-full bg-navy-900 border border-white/10 rounded-lg px-3 py-2 text-sm text-white
-                         focus:outline-none focus:border-gold-500 font-devanagari"
-            >
-              {Object.entries(SET_LABELS).map(([num, label]) => (
-                <option key={num} value={num}>{label}</option>
-              ))}
-            </select>
-          </div>
+          {ageGroups.length === 0 ? (
+            <p className="text-xs text-gray-500 animate-pulse">⏳ प्रश्न बैंक लोड हो रहा है…</p>
+          ) : (
+            <>
+              {/* Age group selector — built from live Firebase data */}
+              <div>
+                <label className="text-xs text-gray-500 mb-1.5 block uppercase tracking-widest">आयु वर्ग चुनें</label>
+                <select
+                  value={ageGroupIdx}
+                  onChange={e => {
+                    const newIdx = Number(e.target.value)
+                    setAgeGroupIdx(newIdx)
+                    // Auto-select the first set of the newly chosen age group
+                    setSelectedSet(ageGroups[newIdx].sets[0])
+                  }}
+                  className="w-full bg-navy-900 border border-white/10 rounded-lg px-3 py-2 text-sm text-white
+                             focus:outline-none focus:border-gold-500 font-devanagari"
+                >
+                  {ageGroups.map((group, idx) => (
+                    <option key={idx} value={idx}>{group.ageGroup}</option>
+                  ))}
+                </select>
+              </div>
+              {/* Set number selector — only the sets belonging to the chosen age group */}
+              <div>
+                <label className="text-xs text-gray-500 mb-1.5 block uppercase tracking-widest">सेट चुनें</label>
+                <select
+                  value={gameState.selectedSet ?? ageGroups[ageGroupIdx].sets[0]}
+                  onChange={e => setSelectedSet(Number(e.target.value))}
+                  className="w-full bg-navy-900 border border-white/10 rounded-lg px-3 py-2 text-sm text-white
+                             focus:outline-none focus:border-gold-500 font-devanagari"
+                >
+                  {ageGroups[ageGroupIdx].sets.map((setNum, pos) => (
+                    <option key={setNum} value={setNum}>सेट {pos + 1}</option>
+                  ))}
+                </select>
+              </div>
+            </>
+          )}
           {/* Contestant name */}
           <div className="flex gap-2">
             <input
@@ -144,10 +181,19 @@ export default function GameControls({ gameState }) {
           </div>
           <button
             onClick={() => handleLoadQuestion(1)}
-            disabled={loadingQ}
+            disabled={loadingQ || ageGroups.length === 0}
             className={`${BTN} w-full bg-blue-700 hover:bg-blue-600 text-white`}
           >
-            {loadingQ ? '⏳ लोड हो रहा है…' : `🎮 ${SET_LABELS[gameState.selectedSet ?? 1] || `Set ${gameState.selectedSet ?? 1}`} — Level 1 शुरू करें`}
+            {loadingQ
+              ? '⏳ लोड हो रहा है…'
+              : ageGroups.length === 0
+                ? '⏳ लोड हो रहा है…'
+                : (() => {
+                    const group = ageGroups[ageGroupIdx]
+                    const currentSet = gameState.selectedSet ?? group.sets[0]
+                    const pos = group.sets.indexOf(currentSet) + 1 || 1
+                    return `🎮 ${group.ageGroup} — सेट ${pos} — Level 1 शुरू करें`
+                  })()}
           </button>
         </div>
       )}

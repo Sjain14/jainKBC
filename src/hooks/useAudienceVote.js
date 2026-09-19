@@ -1,42 +1,41 @@
 /**
  * useAudienceVote.js — real-time audience voting hook for the player screen.
  *
- * Each device gets a random token in localStorage.
- * Vote is written to /audienceVotes/{questionId}/{token} = 'A'|'B'|'C'|'D'
- * Votes are keyed by questionId so they reset automatically per question.
+ * Voter identity: Firebase Anonymous Auth UID (passed in as `uid`).
+ * Vote path:      /audienceVotes/{questionId}/{uid} = 'A'|'B'|'C'|'D'
+ * Dedup:          two-layer —
+ *   1. App layer:  submitVote() guards on hasVoted
+ *   2. DB layer:   RTDB Security Rules enforce write-once per uid (see database.rules.json)
+ *
+ * Two-step UX:
+ *   - setPendingVote(opt)  → highlights a selection, does NOT write to Firebase
+ *   - submitVote()         → writes pendingVote to Firebase (one-time, irreversible)
  */
 
 import { useState, useEffect, useCallback } from 'react'
 import { ref, set, onValue, get }           from 'firebase/database'
 import { db }                               from '../firebase/config.js'
 
-function getVoterToken() {
-  let token = localStorage.getItem('kbc_voter_token')
-  if (!token) {
-    token = Math.random().toString(36).slice(2) + Date.now().toString(36)
-    localStorage.setItem('kbc_voter_token', token)
-  }
-  return token
-}
-
 /**
  * Hook for the PLAYER screen.
- * Returns { myVote, totalVotes, voteCounts, castVote, hasVoted }
+ * @param {string|null} questionId  — current question ID from gameState
+ * @param {string|null} uid         — Firebase Anonymous Auth UID from useAnonymousAuth
+ * Returns { myVote, pendingVote, setPendingVote, submitVote, voteCounts, totalVotes, hasVoted }
  */
-export function useAudienceVote(questionId) {
-  const [myVote,     setMyVote]     = useState(null)
-  const [voteCounts, setVoteCounts] = useState({ A: 0, B: 0, C: 0, D: 0 })
-  // Stable token — getVoterToken reads/writes localStorage, memoize so it
-  // isn't called on every render (React StrictMode double-invokes render)
-  const token = useState(() => getVoterToken())[0]
+export function useAudienceVote(questionId, uid) {
+  const [myVote,      setMyVote]      = useState(null)
+  const [pendingVote, setPendingVote] = useState(null)
+  const [voteCounts,  setVoteCounts]  = useState({ A: 0, B: 0, C: 0, D: 0 })
 
-  // Load my previous vote for this question from localStorage
+  // ── Restore "already voted" state from localStorage (fast UI hint on page refresh) ──
   useEffect(() => {
+    if (!questionId) return
     const stored = localStorage.getItem(`kbc_vote_${questionId}`)
     setMyVote(stored ?? null)
+    setPendingVote(null)   // clear pending on question change
   }, [questionId])
 
-  // Listen to all votes for this question in real time
+  // ── Listen to all votes for this question in real time ──
   useEffect(() => {
     if (!questionId) return
     const votesRef = ref(db, `audienceVotes/${questionId}`)
@@ -52,21 +51,49 @@ export function useAudienceVote(questionId) {
     return () => unsub()
   }, [questionId])
 
+  // ── Write a specific option to Firebase (internal helper) ──
+  const writeVote = useCallback(async (option) => {
+    if (!uid || !questionId || myVote) return
+    try {
+      await set(ref(db, `audienceVotes/${questionId}/${uid}`), option)
+      localStorage.setItem(`kbc_vote_${questionId}`, option)
+      setMyVote(option)
+    } catch (err) {
+      // RTDB Security Rule violation (already voted) — swallow silently
+      console.warn('[useAudienceVote] writeVote rejected:', err.message)
+    }
+  }, [uid, questionId, myVote])
+
+  // submitVote: commits the currently selected pendingVote to Firebase
+  const submitVote = useCallback(async () => {
+    if (!pendingVote) return
+    await writeVote(pendingVote)
+  }, [pendingVote, writeVote])
+
+  // castVote: single-step select+submit (used by passive AudienceVoteButtons)
   const castVote = useCallback(async (option) => {
-    if (!questionId || myVote) return  // one vote per question
-    await set(ref(db, `audienceVotes/${questionId}/${token}`), option)
-    localStorage.setItem(`kbc_vote_${questionId}`, option)
-    setMyVote(option)
-  }, [questionId, myVote, token])
+    setPendingVote(option)
+    await writeVote(option)
+  }, [writeVote])
 
   const totalVotes = Object.values(voteCounts).reduce((s, v) => s + v, 0)
 
-  return { myVote, voteCounts, totalVotes, castVote, hasVoted: !!myVote }
+  return {
+    myVote,
+    pendingVote,
+    setPendingVote,
+    submitVote,
+    castVote,
+    voteCounts,
+    totalVotes,
+    hasVoted: !!myVote,
+  }
 }
 
 /**
  * Utility used by ADMIN to collect current votes and compute percentages.
  * Returns { A, B, C, D } as integers summing to 100.
+ * Falls back to equal distribution if no votes were cast.
  */
 export async function collectVotePercentages(questionId) {
   const snap = await get(ref(db, `audienceVotes/${questionId}`))
@@ -85,6 +112,6 @@ export async function collectVotePercentages(questionId) {
     pct[k] = Math.round((counts[k] / total) * 100)
     sum += pct[k]
   })
-  pct['D'] = 100 - sum
+  pct['D'] = 100 - sum   // ensures A+B+C+D === 100 exactly
   return pct
 }

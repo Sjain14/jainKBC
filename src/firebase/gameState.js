@@ -98,6 +98,8 @@ export async function loadQuestion(level, question, levelTitle) {
     selectedOption:      '',
     showCorrectAnswer:   false,
     showAudiencePoll:    false,
+    audiencePollActive:  false,
+    pollStartedAt:       0,
     showExpertOverlay:   false,
     expertMessage:       '',
     currentLevelTitle:   levelTitle,

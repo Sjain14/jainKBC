@@ -11,7 +11,6 @@ import OptionButton         from '../components/OptionButton.jsx'
 import PrizeLadder          from '../components/PrizeLadder.jsx'
 import LifelineBar          from '../components/LifelineBar.jsx'
 import TimerDisplay         from '../components/TimerDisplay.jsx'
-import AudiencePoll         from '../components/AudiencePoll.jsx'
 import AudiencePollModal    from '../components/AudiencePollModal.jsx'
 import AudienceVoteButtons  from '../components/AudienceVoteButtons.jsx'
 import ExpertOverlay        from '../components/ExpertOverlay.jsx'
@@ -20,7 +19,7 @@ import ShareModal           from '../components/ShareModal.jsx'
 
 const OPTION_LABELS = ['A', 'B', 'C', 'D']
 
-export default function QuestionScreen({ gameState, soundManager }) {
+export default function QuestionScreen({ gameState, soundManager, uid }) {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false)
   const {
     questionText, optionA, optionB, optionC, optionD,
@@ -121,9 +120,9 @@ export default function QuestionScreen({ gameState, soundManager }) {
           ))}
         </div>
 
-        {/* ─ Audience vote buttons (only during active question, before lifeline used and no poll popup) ─ */}
-        {gameState.phase === 'question' && !lifelineAskAudienceUsed && !showCorrectAnswer && !audiencePollActive && (
-          <AudienceVoteButtons questionId={questionId} />
+        {/* ─ Audience vote buttons (shown during question before lifeline used, hidden when poll/results active) ─ */}
+        {gameState.phase === 'question' && !lifelineAskAudienceUsed && !showCorrectAnswer && !audiencePollActive && !showAudiencePoll && (
+          <AudienceVoteButtons questionId={questionId} uid={uid} />
         )}
 
         {/* ─ Lifeline bar ─ */}
@@ -136,21 +135,19 @@ export default function QuestionScreen({ gameState, soundManager }) {
         </div>
       </div>
 
-      {/* ── Audience Poll Voting Modal (30-sec window) ── */}
-      {audiencePollActive && questionId && (
+      {/* ── Audience Poll Modal — voting phase + results phase (same component) ── */}
+      {(audiencePollActive || showAudiencePoll) && questionId && (
         <AudiencePollModal
           questionId={questionId}
+          uid={uid}
           pollStartedAt={pollStartedAt}
           optionA={optionA} optionB={optionB}
           optionC={optionC} optionD={optionD}
-        />
-      )}
-
-      {/* ── Audience Poll Results Overlay ── */}
-      {showAudiencePoll && (
-        <AudiencePoll
-          pollA={audiencePollA} pollB={audiencePollB}
-          pollC={audiencePollC} pollD={audiencePollD}
+          showAudiencePoll={showAudiencePoll}
+          audiencePollA={audiencePollA}
+          audiencePollB={audiencePollB}
+          audiencePollC={audiencePollC}
+          audiencePollD={audiencePollD}
         />
       )}
 
