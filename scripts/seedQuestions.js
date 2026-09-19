@@ -37,18 +37,20 @@ if (existsSync(envPath)) {
 }
 
 // ── Load questions data ──────────────────────────────────────────────────
-// Prefer the compiled_sets/questions.json if present, or fallback to src/data/questions.json
+// Prefer question research 2/questions.json if present, then fallback to src/data/questions.json
+const flatPath2 = join(__dirname, '../../question research 2/questions.json')
 const flatPath = join(__dirname, '../../question_research/compiled_sets/questions.json')
 const groupedPath = join(__dirname, '../src/data/questions.json')
 
-let rawQuestions
-if (existsSync(flatPath)) {
-  console.log(`📂 Reading questions from: ${flatPath}`)
-  rawQuestions = JSON.parse(readFileSync(flatPath, 'utf-8'))
-} else {
-  console.log(`📂 Reading questions from: ${groupedPath}`)
-  rawQuestions = JSON.parse(readFileSync(groupedPath, 'utf-8'))
+let selectedPath = groupedPath
+if (existsSync(flatPath2)) {
+  selectedPath = flatPath2
+} else if (existsSync(flatPath)) {
+  selectedPath = flatPath
 }
+
+console.log(`📂 Reading questions from: ${selectedPath}`)
+const rawQuestions = JSON.parse(readFileSync(selectedPath, 'utf-8'))
 
 // Helper to convert flat array to grouped format
 function normalizeQuestions(data) {
