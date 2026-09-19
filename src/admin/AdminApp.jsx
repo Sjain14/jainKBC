@@ -13,22 +13,24 @@
  *   Escape   — clear selected option
  */
 
-import { useEffect, useCallback } from 'react'
+import { useEffect, useCallback, useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAdminAuth }  from '../hooks/useAdminAuth.js'
 import { useGameState }  from '../hooks/useGameState.js'
 import StatusBar         from './components/StatusBar.jsx'
-import PrizeLadderMini       from './components/PrizeLadderMini.jsx'
-import QuestionPanel         from './components/QuestionPanel.jsx'
-import GameControls          from './components/GameControls.jsx'
-import LifelinePanel         from './components/LifelinePanel.jsx'
-import QuestionBank          from './components/QuestionBank.jsx'
+import PrizeLadderMini   from './components/PrizeLadderMini.jsx'
+import QuestionPanel     from './components/QuestionPanel.jsx'
+import GameControls      from './components/GameControls.jsx'
+import LifelinePanel     from './components/LifelinePanel.jsx'
+import QuestionBank      from './components/QuestionBank.jsx'
+import ChangeQModal      from './components/ChangeQModal.jsx'
 import { selectOption, pauseTimer, resumeTimer, revealAnswer } from '../firebase/gameState.js'
 import { getRemainingSeconds } from '../hooks/useTimer.js'
 
 export default function AdminApp() {
   const { user, loading: authLoading, signOut } = useAdminAuth()
   const { gameState, loading: gsLoading } = useGameState()
+  const [showOverrideModal, setShowOverrideModal] = useState(false)
 
   // ── Keyboard shortcuts — must be declared before any conditional return ──
   const handleKey = useCallback((e) => {
@@ -93,9 +95,32 @@ export default function AdminApp() {
       {/* 3-column grid */}
       <div className="flex-1 grid grid-cols-[260px_1fr_280px] gap-3 p-3 overflow-hidden">
 
-        {/* ── LEFT: Prize Ladder + Info ── */}
+        {/* ── LEFT: Prize Ladder + Admin Override ── */}
         <aside className="flex flex-col gap-3 overflow-y-auto">
           <PrizeLadderMini gameState={gameState} />
+
+          {/* Admin Override — swap question without using lifeline */}
+          {gameState.phase === 'question' && (
+            <div className="bg-navy-800/60 border border-red-900/30 rounded-xl p-3">
+              <h3 className="text-xs uppercase tracking-widest text-gray-500 mb-2">Admin Override</h3>
+              <button
+                onClick={() => setShowOverrideModal(true)}
+                className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg
+                           bg-red-900/20 border border-red-700/30 hover:bg-red-900/30 transition-colors
+                           text-xs font-bold text-red-400 uppercase tracking-widest active:scale-95"
+              >
+                ⚙️ प्रश्न बदलें (lifeline नहीं लगेगी)
+              </button>
+            </div>
+          )}
+
+          {showOverrideModal && (
+            <ChangeQModal
+              level={gameState.currentLevel}
+              onClose={() => setShowOverrideModal(false)}
+              adminOverride={true}
+            />
+          )}
         </aside>
 
         {/* ── CENTER: Question + Controls ── */}

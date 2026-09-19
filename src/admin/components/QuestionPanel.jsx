@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import ChangeQModal from './ChangeQModal.jsx'
 
 const LABELS = ['A', 'B', 'C', 'D']
 
@@ -11,8 +10,7 @@ const STATE_COLORS = {
 }
 
 export default function QuestionPanel({ gameState }) {
-  const [showAnswer,       setShowAnswer]       = useState(false)
-  const [showOverrideModal, setShowOverrideModal] = useState(false)
+  const [showAnswer, setShowAnswer] = useState(false)
 
   const {
     phase, questionText, optionA, optionB, optionC, optionD,
@@ -112,18 +110,6 @@ export default function QuestionPanel({ gameState }) {
         )}
       </div>
 
-      {/* ── Admin Override: swap question without using lifeline ── */}
-      <div className="border-t border-white/5 pt-3">
-        <button
-          onClick={() => setShowOverrideModal(true)}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg
-                     bg-red-900/20 border border-red-700/30 hover:bg-red-900/30 transition-colors
-                     text-xs font-bold text-red-400 uppercase tracking-widest"
-        >
-          ⚙️ Admin Override — प्रश्न बदलें (lifeline नहीं लगेगी)
-        </button>
-      </div>
-
       {/* Keyboard hint */}
       <p className="text-[10px] text-gray-600 text-center">
         Keyboard: <kbd className="bg-white/10 rounded px-1">1</kbd>
@@ -134,14 +120,6 @@ export default function QuestionPanel({ gameState }) {
         <kbd className="bg-white/10 rounded px-1">R</kbd> = Reveal
       </p>
 
-      {/* Admin Override Modal */}
-      {showOverrideModal && (
-        <ChangeQModal
-          level={currentLevel}
-          onClose={() => setShowOverrideModal(false)}
-          adminOverride={true}
-        />
-      )}
     </div>
   )
 }
