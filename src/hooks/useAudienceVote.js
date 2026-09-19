@@ -26,6 +26,7 @@ export function useAudienceVote(questionId, uid) {
   const [myVote,      setMyVote]      = useState(null)
   const [pendingVote, setPendingVote] = useState(null)
   const [voteCounts,  setVoteCounts]  = useState({ A: 0, B: 0, C: 0, D: 0 })
+  const [voteError,   setVoteError]   = useState(null)
 
   // ── Restore "already voted" state from localStorage (fast UI hint on page refresh) ──
   useEffect(() => {
@@ -54,13 +55,18 @@ export function useAudienceVote(questionId, uid) {
   // ── Write a specific option to Firebase (internal helper) ──
   const writeVote = useCallback(async (option) => {
     if (!uid || !questionId || myVote) return
+    setVoteError(null)
     try {
       await set(ref(db, `audienceVotes/${questionId}/${uid}`), option)
       localStorage.setItem(`kbc_vote_${questionId}`, option)
       setMyVote(option)
     } catch (err) {
-      // RTDB Security Rule violation (already voted) — swallow silently
-      console.warn('[useAudienceVote] writeVote rejected:', err.message)
+      console.error('[useAudienceVote] writeVote rejected:', err.code, err.message)
+      if (err.code === 'PERMISSION_DENIED') {
+        setVoteError('permission_denied')
+      } else {
+        setVoteError('network_error')
+      }
     }
   }, [uid, questionId, myVote])
 
@@ -87,6 +93,7 @@ export function useAudienceVote(questionId, uid) {
     voteCounts,
     totalVotes,
     hasVoted: !!myVote,
+    voteError,
   }
 }
 

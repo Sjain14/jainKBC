@@ -50,7 +50,7 @@ export default function AudiencePollModal({
 }) {
   const {
     myVote, pendingVote, setPendingVote,
-    submitVote, hasVoted, totalVotes,
+    submitVote, hasVoted, totalVotes, voteError,
   } = useAudienceVote(questionId, uid)
 
   const [secondsLeft,  setSecondsLeft]  = useState(() =>
@@ -239,6 +239,18 @@ export default function AudiencePollModal({
                     </span>
                   : '✅ Submit करें'}
               </button>
+            )}
+
+            {/* Error feedback */}
+            {voteError === 'permission_denied' && (
+              <p className="text-center text-xs text-red-400 mt-2 font-devanagari">
+                ❌ Vote submit नहीं हुआ — Firebase rules check करें (Anonymous Auth चालू है?)
+              </p>
+            )}
+            {voteError === 'network_error' && (
+              <p className="text-center text-xs text-yellow-400 mt-2 font-devanagari">
+                ⚠️ Network error — फिर से try करें
+              </p>
             )}
           </>
         )}

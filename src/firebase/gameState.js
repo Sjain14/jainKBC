@@ -208,10 +208,11 @@ export async function timerExpired() {
 
 // ─── Lifeline writers ──────────────────────────────────────────────────────
 
-/** Trigger Ask the Audience with simulated poll percentages */
+/** Trigger Ask the Audience with collected poll percentages — shows results on player screen */
 export async function triggerAskAudience(pollA, pollB, pollC, pollD) {
   await update(gsRef(), {
     lifelineAskAudienceUsed: true,
+    audiencePollActive:      false,
     showAudiencePoll:        true,
     audiencePollA: pollA,
     audiencePollB: pollB,
@@ -224,9 +225,10 @@ export async function triggerAskAudience(pollA, pollB, pollC, pollD) {
 /** Open the 30-second audience voting window (shows popup on audience screens) */
 export async function startAudiencePoll() {
   await update(gsRef(), {
-    audiencePollActive: true,
-    pollStartedAt:      Date.now(),
-    updatedAt:          Date.now(),
+    lifelineAskAudienceUsed: true,   // mark used as soon as poll starts (not refundable)
+    audiencePollActive:      true,
+    pollStartedAt:           Date.now(),
+    updatedAt:               Date.now(),
   })
 }
 

@@ -100,97 +100,96 @@ export default function LifelinePanel({ gameState }) {
 
       {/* ── 1. Ask the Audience ── */}
       <div className={`rounded-lg border p-3 space-y-2
-        ${lifelineAskAudienceUsed ? 'border-white/5 opacity-50' : 'border-blue-800/40 bg-blue-900/10'}`}>
+        ${lifelineAskAudienceUsed && !audiencePollActive && !showAudiencePoll
+          ? 'border-white/5 opacity-50'
+          : 'border-blue-800/40 bg-blue-900/10'}`}>
         <div className="flex items-center justify-between">
           <span className="text-sm font-semibold text-blue-300">📊 Ask the Audience</span>
-          {lifelineAskAudienceUsed && <span className="text-[10px] text-gray-500 uppercase">Used</span>}
+          {lifelineAskAudienceUsed && !audiencePollActive && !showAudiencePoll &&
+            <span className="text-[10px] text-gray-500 uppercase">Used</span>}
         </div>
 
-        {!lifelineAskAudienceUsed && (
+        {/* Phase 0: poll not started yet, lifeline available */}
+        {!lifelineAskAudienceUsed && !audiencePollActive && !showAudiencePoll && (
           <div className="space-y-2">
-            {/* Phase 1: start the poll */}
-            {!audiencePollActive && !showAudiencePoll && (
-              <>
-                <p className="text-[11px] text-gray-500">
-                  Audience screens पर 30-second voting popup खुलेगा। वोट collect होने के बाद results दिखाएँ।
-                </p>
-                <button
-                  onClick={handleStartPoll}
-                  disabled={!isQuestion}
-                  className={`${BTN} w-full bg-blue-700 hover:bg-blue-600 text-white`}
-                >
-                  📊 Poll शुरू करें (30 sec)
-                </button>
-              </>
-            )}
+            <p className="text-[11px] text-gray-500">
+              Audience screens पर 30-second voting popup खुलेगा। वोट collect होने के बाद results दिखाएँ।
+            </p>
+            <button
+              onClick={handleStartPoll}
+              disabled={!isQuestion}
+              className={`${BTN} w-full bg-blue-700 hover:bg-blue-600 text-white`}
+            >
+              📊 Poll शुरू करें (30 sec)
+            </button>
+          </div>
+        )}
 
-            {/* Phase 1 active: countdown + live count + collect button */}
-            {audiencePollActive && (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] text-gray-400">
-                    ⏳ Voting चल रहा है…
-                    <span className="ml-2 text-blue-400 font-semibold">🗳️ {liveVoteCount} votes</span>
-                  </span>
-                  <span className={`text-sm font-bold tabular-nums ${pollSecsLeft <= 8 ? 'text-red-400' : pollSecsLeft <= 15 ? 'text-yellow-400' : 'text-green-400'}`}>
-                    {pollSecsLeft}s
-                  </span>
-                </div>
-                {/* Progress bar */}
-                <div className="w-full bg-navy-900 rounded-full h-1.5 overflow-hidden">
+        {/* Phase 1 active: countdown + live count + collect button */}
+        {audiencePollActive && (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] text-gray-400">
+                ⏳ Voting चल रहा है…
+                <span className="ml-2 text-blue-400 font-semibold">🗳️ {liveVoteCount} votes</span>
+              </span>
+              <span className={`text-sm font-bold tabular-nums ${pollSecsLeft <= 8 ? 'text-red-400' : pollSecsLeft <= 15 ? 'text-yellow-400' : 'text-green-400'}`}>
+                {pollSecsLeft}s
+              </span>
+            </div>
+            {/* Progress bar */}
+            <div className="w-full bg-navy-900 rounded-full h-1.5 overflow-hidden">
+              <div
+                className={`h-full rounded-full ${pollSecsLeft <= 8 ? 'bg-red-500' : pollSecsLeft <= 15 ? 'bg-yellow-500' : 'bg-green-500'}`}
+                style={{ width: `${(pollSecsLeft / POLL_DURATION) * 100}%`, transition: 'width 0.5s linear' }}
+              />
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={handleCollectAndShow}
+                disabled={collecting}
+                className={`${BTN} flex-1 bg-blue-700 hover:bg-blue-600 text-white`}
+              >
+                {collecting ? '⏳ Collecting…' : '✅ Collect & Show Results'}
+              </button>
+              <button
+                onClick={stopAudiencePoll}
+                disabled={collecting}
+                className={`${BTN} bg-gray-700 hover:bg-gray-600 text-white`}
+              >
+                रद्द
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Phase 2: results collected and showing */}
+        {showAudiencePoll && (
+          <div className="space-y-2">
+            {/* Mini result bars in admin panel */}
+            {[
+              { lbl: 'A', pct: gameState.audiencePollA, color: 'bg-blue-500'   },
+              { lbl: 'B', pct: gameState.audiencePollB, color: 'bg-yellow-500' },
+              { lbl: 'C', pct: gameState.audiencePollC, color: 'bg-green-500'  },
+              { lbl: 'D', pct: gameState.audiencePollD, color: 'bg-red-500'    },
+            ].map(({ lbl, pct, color }) => (
+              <div key={lbl} className="flex items-center gap-2">
+                <span className="text-[11px] font-bold text-gray-400 w-4">{lbl}</span>
+                <div className="flex-1 bg-navy-900 rounded-full h-3 overflow-hidden">
                   <div
-                    className={`h-full rounded-full ${pollSecsLeft <= 8 ? 'bg-red-500' : pollSecsLeft <= 15 ? 'bg-yellow-500' : 'bg-green-500'}`}
-                    style={{ width: `${(pollSecsLeft / POLL_DURATION) * 100}%`, transition: 'width 0.5s linear' }}
+                    className={`h-full rounded-full ${color}`}
+                    style={{ width: `${pct ?? 0}%` }}
                   />
                 </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleCollectAndShow}
-                    disabled={collecting}
-                    className={`${BTN} flex-1 bg-blue-700 hover:bg-blue-600 text-white`}
-                  >
-                    {collecting ? '⏳ Collecting…' : '✅ Collect & Show Results'}
-                  </button>
-                  <button
-                    onClick={stopAudiencePoll}
-                    disabled={collecting}
-                    className={`${BTN} bg-gray-700 hover:bg-gray-600 text-white`}
-                  >
-                    रद्द
-                  </button>
-                </div>
+                <span className="text-[11px] text-gray-300 tabular-nums w-8 text-right">{pct ?? 0}%</span>
               </div>
-            )}
-
-            {/* Phase 2: results collected and showing */}
-            {showAudiencePoll && (
-              <div className="space-y-2">
-                {/* Mini result bars in admin panel */}
-                {[
-                  { lbl: 'A', pct: gameState.audiencePollA, color: 'bg-blue-500'   },
-                  { lbl: 'B', pct: gameState.audiencePollB, color: 'bg-yellow-500' },
-                  { lbl: 'C', pct: gameState.audiencePollC, color: 'bg-green-500'  },
-                  { lbl: 'D', pct: gameState.audiencePollD, color: 'bg-red-500'    },
-                ].map(({ lbl, pct, color }) => (
-                  <div key={lbl} className="flex items-center gap-2">
-                    <span className="text-[11px] font-bold text-gray-400 w-4">{lbl}</span>
-                    <div className="flex-1 bg-navy-900 rounded-full h-3 overflow-hidden">
-                      <div
-                        className={`h-full rounded-full ${color}`}
-                        style={{ width: `${pct ?? 0}%` }}
-                      />
-                    </div>
-                    <span className="text-[11px] text-gray-300 tabular-nums w-8 text-right">{pct ?? 0}%</span>
-                  </div>
-                ))}
-                <button
-                  onClick={hideAudiencePoll}
-                  className={`${BTN} w-full bg-gray-700 hover:bg-gray-600 text-white mt-1`}
-                >
-                  Hide Results
-                </button>
-              </div>
-            )}
+            ))}
+            <button
+              onClick={hideAudiencePoll}
+              className={`${BTN} w-full bg-gray-700 hover:bg-gray-600 text-white mt-1`}
+            >
+              Hide Results
+            </button>
           </div>
         )}
       </div>
