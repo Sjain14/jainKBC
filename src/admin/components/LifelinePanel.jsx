@@ -36,6 +36,9 @@ export default function LifelinePanel({ gameState }) {
   const [showChangeQ,   setShowChangeQ]   = useState(false)
   const [pollSecsLeft,  setPollSecsLeft]  = useState(0)
   const [liveVoteCount, setLiveVoteCount] = useState(0)
+  // Admin-only local results — shown in panel without pushing to audience screen
+  const [localResults,  setLocalResults]  = useState(null)   // { A, B, C, D } or null
+  const [viewingLocal,  setViewingLocal]  = useState(false)  // loading state
   // Ref to handleCollectAndShow so the countdown useEffect can call it
   // without a stale closure (functions defined below use current state).
   const collectRef = useRef(null)
@@ -71,16 +74,30 @@ export default function LifelinePanel({ gameState }) {
 
   // Phase 1: open the voting window on all audience screens
   async function handleStartPoll() {
+    setLocalResults(null)   // clear any previous local preview
     await startAudiencePoll()
   }
 
-  // Phase 2: close the window, collect votes, show results bar chart
+  // Admin-only: collect votes and show in admin panel ONLY (no audience screen change)
+  async function handleViewLocalResults() {
+    if (viewingLocal) return
+    setViewingLocal(true)
+    try {
+      const p = await collectVotePercentages(currentQuestionId)
+      setLocalResults(p)
+    } finally {
+      setViewingLocal(false)
+    }
+  }
+
+  // Phase 2: close the window, collect votes, push results to ALL screens
   async function handleCollectAndShow() {
     if (collecting) return   // prevent double-fire from auto + manual click
     setCollecting(true)
     try {
-      await stopAudiencePoll()
       const p = await collectVotePercentages(currentQuestionId)
+      setLocalResults(p)   // show locally immediately
+      // Single atomic write: stop poll + mark used + show results all at once
       await triggerAskAudience(p.A, p.B, p.C, p.D)
     } finally {
       setCollecting(false)
@@ -144,13 +161,46 @@ export default function LifelinePanel({ gameState }) {
                 style={{ width: `${(pollSecsLeft / POLL_DURATION) * 100}%`, transition: 'width 0.5s linear' }}
               />
             </div>
+
+            {/* Admin-only local preview — does NOT push to audience */}
+            {localResults && !showAudiencePoll && (
+              <div className="space-y-1 pt-1 border-t border-white/5">
+                <p className="text-[10px] text-gray-500 uppercase tracking-widest">Admin Preview (not shown to audience)</p>
+                {[
+                  { lbl: 'A', color: 'bg-blue-500'   },
+                  { lbl: 'B', color: 'bg-yellow-500' },
+                  { lbl: 'C', color: 'bg-green-500'  },
+                  { lbl: 'D', color: 'bg-red-500'    },
+                ].map(({ lbl, color }) => (
+                  <div key={lbl} className="flex items-center gap-2">
+                    <span className="text-[11px] font-bold text-gray-400 w-4">{lbl}</span>
+                    <div className="flex-1 bg-navy-900 rounded-full h-2.5 overflow-hidden">
+                      <div className={`h-full rounded-full ${color}`} style={{ width: `${localResults[lbl] ?? 0}%` }} />
+                    </div>
+                    <span className="text-[11px] text-gray-300 tabular-nums w-8 text-right">{localResults[lbl] ?? 0}%</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
             <div className="flex gap-2">
+              {/* Admin-only peek — no audience effect */}
+              {!localResults && (
+                <button
+                  onClick={handleViewLocalResults}
+                  disabled={viewingLocal || liveVoteCount === 0}
+                  className={`${BTN} bg-indigo-800 hover:bg-indigo-700 text-white`}
+                  title="Admin को results दिखाएँ, audience screen पर नहीं"
+                >
+                  {viewingLocal ? '⏳' : '👁 Preview'}
+                </button>
+              )}
               <button
                 onClick={handleCollectAndShow}
                 disabled={collecting}
                 className={`${BTN} flex-1 bg-blue-700 hover:bg-blue-600 text-white`}
               >
-                {collecting ? '⏳ Collecting…' : '✅ Collect & Show Results'}
+                {collecting ? '⏳ Collecting…' : '✅ Collect & Show (All)'}
               </button>
               <button
                 onClick={stopAudiencePoll}
@@ -163,10 +213,9 @@ export default function LifelinePanel({ gameState }) {
           </div>
         )}
 
-        {/* Phase 2: results collected and showing */}
+        {/* Phase 2: results pushed to all screens (showAudiencePoll === true in Firebase) */}
         {showAudiencePoll && (
           <div className="space-y-2">
-            {/* Mini result bars in admin panel */}
             {[
               { lbl: 'A', pct: gameState.audiencePollA, color: 'bg-blue-500'   },
               { lbl: 'B', pct: gameState.audiencePollB, color: 'bg-yellow-500' },
@@ -176,10 +225,7 @@ export default function LifelinePanel({ gameState }) {
               <div key={lbl} className="flex items-center gap-2">
                 <span className="text-[11px] font-bold text-gray-400 w-4">{lbl}</span>
                 <div className="flex-1 bg-navy-900 rounded-full h-3 overflow-hidden">
-                  <div
-                    className={`h-full rounded-full ${color}`}
-                    style={{ width: `${pct ?? 0}%` }}
-                  />
+                  <div className={`h-full rounded-full ${color}`} style={{ width: `${pct ?? 0}%` }} />
                 </div>
                 <span className="text-[11px] text-gray-300 tabular-nums w-8 text-right">{pct ?? 0}%</span>
               </div>
@@ -188,8 +234,56 @@ export default function LifelinePanel({ gameState }) {
               onClick={hideAudiencePoll}
               className={`${BTN} w-full bg-gray-700 hover:bg-gray-600 text-white mt-1`}
             >
-              Hide Results
+              Hide Results (All Screens)
             </button>
+          </div>
+        )}
+
+        {/* Poll used + no active state: show "View Results" button to re-read from Firebase */}
+        {lifelineAskAudienceUsed && !audiencePollActive && !showAudiencePoll && (
+          <div className="space-y-2">
+            {localResults ? (
+              <>
+                <p className="text-[10px] text-gray-500 uppercase tracking-widest">Results (Admin Only)</p>
+                {[
+                  { lbl: 'A', color: 'bg-blue-500'   },
+                  { lbl: 'B', color: 'bg-yellow-500' },
+                  { lbl: 'C', color: 'bg-green-500'  },
+                  { lbl: 'D', color: 'bg-red-500'    },
+                ].map(({ lbl, color }) => (
+                  <div key={lbl} className="flex items-center gap-2">
+                    <span className="text-[11px] font-bold text-gray-400 w-4">{lbl}</span>
+                    <div className="flex-1 bg-navy-900 rounded-full h-2.5 overflow-hidden">
+                      <div className={`h-full rounded-full ${color}`} style={{ width: `${localResults[lbl] ?? 0}%` }} />
+                    </div>
+                    <span className="text-[11px] text-gray-300 tabular-nums w-8 text-right">{localResults[lbl] ?? 0}%</span>
+                  </div>
+                ))}
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleViewLocalResults}
+                    disabled={viewingLocal}
+                    className={`${BTN} flex-1 bg-indigo-800 hover:bg-indigo-700 text-white`}
+                  >
+                    🔄 Refresh
+                  </button>
+                  <button
+                    onClick={async () => { const p = localResults; await triggerAskAudience(p.A, p.B, p.C, p.D) }}
+                    className={`${BTN} flex-1 bg-blue-700 hover:bg-blue-600 text-white`}
+                  >
+                    📺 Show to Audience
+                  </button>
+                </div>
+              </>
+            ) : (
+              <button
+                onClick={handleViewLocalResults}
+                disabled={viewingLocal}
+                className={`${BTN} w-full bg-indigo-800 hover:bg-indigo-700 text-white`}
+              >
+                {viewingLocal ? '⏳ Loading…' : '📊 View Results'}
+              </button>
+            )}
           </div>
         )}
       </div>
