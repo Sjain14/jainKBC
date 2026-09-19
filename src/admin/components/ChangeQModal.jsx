@@ -7,9 +7,10 @@
  *
  * Props:
  *   level         — current game level (1-7)
- *   gameState     — full game state object
  *   onClose       — callback to close modal
  *   adminOverride — if true: skips markChangeQUsed(), shows red heading
+ *
+ * Used backup questions are shown with an amber warning but remain selectable.
  */
 
 import { useState, useEffect } from 'react'
@@ -29,12 +30,11 @@ export default function ChangeQModal({ level, onClose, adminOverride = false }) 
   }, [level])
 
   async function handleSelect(q) {
-    if (q.used) return
     setSelecting(q.id)
     try {
       const row = PRIZE_LADDER.find(r => r.level === level)
       await markBackupUsed(q.id)
-      if (!adminOverride) await markChangeQUsed()  // lifeline used; admin override leaves it intact
+      if (!adminOverride) await markChangeQUsed()
       await loadQuestion(level, q, row?.title ?? '')
       onClose()
     } catch (err) {
@@ -47,7 +47,7 @@ export default function ChangeQModal({ level, onClose, adminOverride = false }) 
   const available = backups.filter(q => !q.used)
   const used      = backups.filter(q =>  q.used)
 
-  const borderColor = adminOverride ? 'border-red-600/40'  : 'border-gold-600/30'
+  const borderColor  = adminOverride ? 'border-red-600/40'  : 'border-gold-600/30'
   const headingColor = adminOverride ? 'text-red-400'       : 'text-gold-400'
   const heading      = adminOverride
     ? `⚙️ Admin Override — Level ${level} प्रश्न बदलें`
@@ -80,44 +80,28 @@ export default function ChangeQModal({ level, onClose, adminOverride = false }) 
 
           {/* Available backups */}
           {available.map(q => (
-            <button
+            <QuestionCard
               key={q.id}
-              onClick={() => handleSelect(q)}
-              disabled={!!selecting}
-              className="w-full text-left bg-navy-900 hover:bg-navy-700 border border-white/10
-                         hover:border-gold-500/40 rounded-xl px-4 py-3 transition-all disabled:opacity-50"
-            >
-              <p className="text-white font-devanagari text-sm leading-relaxed mb-2">{q.text}</p>
-              <div className="grid grid-cols-2 gap-1">
-                {['A','B','C','D'].map(opt => (
-                  <span key={opt} className="text-[11px] text-gray-400 font-devanagari">
-                    <strong className="text-gray-300 mr-1">{opt}.</strong>
-                    {q[`option${opt}`]}
-                  </span>
-                ))}
-              </div>
-              {selecting === q.id && (
-                <p className="text-gold-400 text-xs mt-1 animate-pulse">लोड हो रहा है…</p>
-              )}
-            </button>
+              q={q}
+              selecting={selecting}
+              onSelect={handleSelect}
+            />
           ))}
 
-          {/* Used backups — shown dimmed for host reference */}
+          {/* Used backups — amber warning, still selectable */}
           {used.length > 0 && (
             <>
               <p className="text-xs text-gray-600 uppercase tracking-widest pt-2 pb-1 border-t border-white/5">
                 पहले उपयोग हो चुके ({used.length})
               </p>
               {used.map(q => (
-                <div
+                <QuestionCard
                   key={q.id}
-                  className="w-full text-left bg-navy-900/40 border border-white/5 rounded-xl px-4 py-3 opacity-50"
-                >
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-[10px] bg-gray-700 text-gray-400 px-2 py-0.5 rounded uppercase tracking-wide">Used</span>
-                  </div>
-                  <p className="text-gray-500 font-devanagari text-sm line-through leading-relaxed">{q.text}</p>
-                </div>
+                  q={q}
+                  selecting={selecting}
+                  onSelect={handleSelect}
+                  wasUsed
+                />
               ))}
             </>
           )}
@@ -131,5 +115,47 @@ export default function ChangeQModal({ level, onClose, adminOverride = false }) 
         </button>
       </div>
     </div>
+  )
+}
+
+// ── Sub-component: one question card (available or previously-used) ──────────
+function QuestionCard({ q, selecting, onSelect, wasUsed = false }) {
+  return (
+    <button
+      onClick={() => onSelect(q)}
+      disabled={!!selecting}
+      className={`w-full text-left rounded-xl px-4 py-3 border transition-all disabled:opacity-60
+        ${wasUsed
+          ? 'bg-amber-950/30 border-amber-600/40 hover:bg-amber-900/40 hover:border-amber-500/60'
+          : 'bg-navy-900 border-white/10 hover:bg-navy-700 hover:border-gold-500/40'
+        }`}
+    >
+      {/* Used warning banner */}
+      {wasUsed && (
+        <div className="flex items-center gap-2 mb-2 bg-amber-900/40 border border-amber-600/30 rounded-lg px-2 py-1">
+          <span className="text-amber-400 text-sm">⚠️</span>
+          <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wide">
+            पहले उपयोग हो चुका है — फिर भी चुन सकते हैं
+          </span>
+        </div>
+      )}
+
+      <p className={`font-devanagari text-sm leading-relaxed mb-2 ${wasUsed ? 'text-amber-100/80' : 'text-white'}`}>
+        {q.text}
+      </p>
+
+      <div className="grid grid-cols-2 gap-1">
+        {['A','B','C','D'].map(opt => (
+          <span key={opt} className={`text-[11px] font-devanagari ${wasUsed ? 'text-amber-200/60' : 'text-gray-400'}`}>
+            <strong className={`mr-1 ${wasUsed ? 'text-amber-300/80' : 'text-gray-300'}`}>{opt}.</strong>
+            {q[`option${opt}`]}
+          </span>
+        ))}
+      </div>
+
+      {selecting === q.id && (
+        <p className="text-gold-400 text-xs mt-2 animate-pulse">लोड हो रहा है…</p>
+      )}
+    </button>
   )
 }
